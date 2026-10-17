@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Cart — Shopnix</title>
+<meta name="description" content="Review the items in your Shopnix cart before checkout.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/cart.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="My Cart — Shopnix">
+<meta property="og:description" content="Review the items in your Shopnix cart before checkout.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/cart.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-QN2uZ1vAhf8gdrrFOLw4wE2KdX5spVXCDlYE/U8vKSY='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / My Cart</div>
+    <h1>My Cart</h1>
+    <p>Review your items before checkout</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container split-layout">
+    <div>
+      <div id="cartPageItems" class="form-card" style="max-width:none;"></div>
+    </div>
+    <div class="form-card" style="max-width:none;">
+      <h2>Order Summary</h2>
+      <p class="form-sub">Subtotal</p>
+      <div class="price-row" style="margin-bottom:16px;">
+        <span class="price" id="cartPageSubtotal" style="font-size:22px;">Rs. 0</span>
+      </div>
+      <a href="checkout.html" class="btn btn-accent" id="checkoutLink">Proceed to Checkout</a>
+      <a href="index.html" class="form-switch" style="display:block;margin-top:14px;">&larr; Continue Shopping</a>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+function renderCartPage(){
+  const cart = getCart();
+  const wrap = document.getElementById('cartPageItems');
+  const checkoutLink = document.getElementById('checkoutLink');
+
+  if (cart.length === 0){
+    wrap.innerHTML = '<p class="empty-state">Your cart is empty. <a href="index.html">Continue shopping &rsaquo;</a></p>';
+    checkoutLink.style.pointerEvents = 'none';
+    checkoutLink.style.opacity = '.5';
+  } else {
+    wrap.innerHTML = '<h2>Cart Items</h2>' + cart.map(c => {
+      const p = getProductById(c.id);
+      if (!p) return '';
+      return `
+        <div class="cart-item" data-id="${p.id}">
+          <img src="${p.img}" alt="${p.name}">
+          <div class="cart-item-info">
+            <h5>${p.name}</h5>
+            <span>${money(p.price)}</span>
+            <div class="cart-item-qty">
+              <button class="qty-dec" aria-label="Decrease quantity" type="button">-</button>
+              <span>${c.qty}</span>
+              <button class="qty-inc" aria-label="Increase quantity" type="button">+</button>
+            </div>
+          </div>
+          <button class="cart-item-remove" type="button">Remove</button>
+        </div>
+      `;
+    }).join('');
+    checkoutLink.style.pointerEvents = 'auto';
+    checkoutLink.style.opacity = '1';
+  }
+  document.getElementById('cartPageSubtotal').textContent = money(cartSubtotal());
+}
+
+onCartChange(renderCartPage);
+renderCartPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Shopnix</title>
+<meta name="description" content="Enter your delivery details and complete your order on Shopnix.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/checkout.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Checkout — Shopnix">
+<meta property="og:description" content="Enter your delivery details and complete your order on Shopnix.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/checkout.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-rABL4j3gd4mk77IDBVdESFHPEa1mQFTcCn8nihG/OwM='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+    <h1>Checkout</h1>
+    <p>Enter your delivery details to place your order</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+
+    <div id="emptyCartNotice" class="form-card" style="display:none;">
+      <h2>Your cart is empty</h2>
+      <p class="form-sub">Add a few products before checking out.</p>
+      <a href="index.html" class="btn btn-accent">Start Shopping</a>
+    </div>
+
+    <div id="checkoutView" class="split-layout" style="display:none;">
+      <div class="form-card" style="max-width:none;">
+        <h2>Delivery Details</h2>
+        <form id="checkoutForm" novalidate>
+          <div class="field" id="ckName">
+            <label for="ckNameInput">Full Name</label>
+            <input type="text" id="ckNameInput" placeholder="Your name">
+            <div class="field-error">Please enter your name.</div>
+          </div>
+          <div class="field" id="ckPhone">
+            <label for="ckPhoneInput">Phone Number</label>
+            <input type="tel" id="ckPhoneInput" placeholder="98XXXXXXXX">
+            <div class="field-error">Please enter a valid 10-digit phone number.</div>
+          </div>
+          <div class="field" id="ckAddress">
+            <label for="ckAddressInput">Delivery Address</label>
+            <textarea id="ckAddressInput" placeholder="Street, city, landmark"></textarea>
+            <div class="field-error">Please enter your delivery address.</div>
+          </div>
+          <div class="field">
+            <label>Payment Method</label>
+            <select id="ckPayment">
+              <option value="cod">Cash on Delivery</option>
+              <option value="esewa">eSewa</option>
+              <option value="khalti">Khalti</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-accent">Place Order</button>
+        </form>
+      </div>
+
+      <div class="form-card" style="max-width:none;">
+        <h2>Order Summary</h2>
+        <div id="checkoutSummaryItems"></div>
+        <div class="price-row" style="margin-top:12px;">
+          <span class="price" id="checkoutSubtotal" style="font-size:20px;">Rs. 0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirmationView" class="confirmation-box" style="display:none;">
+      <div class="check-circle">&#10003;</div>
+      <h2>Order Placed!</h2>
+      <p id="confirmationText"></p>
+      <a href="index.html" class="btn btn-accent">Continue Shopping</a>
+    </div>
+
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+function renderCheckoutSummary(){
+  const cart = getCart();
+  document.getElementById('checkoutSummaryItems').innerHTML = cart.map(c => {
+    const p = getProductById(c.id);
+    if (!p) return '';
+    return `<div class="order-info" style="margin-bottom:10px;">
+      <h4 style="font-size:13.5px;">${p.name} &times; ${c.qty}</h4>
+      <span>${money(p.price * c.qty)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('checkoutSubtotal').textContent = money(cartSubtotal());
+}
+
+function initCheckoutPage(){
+  const cart = getCart();
+  document.getElementById('emptyCartNotice').style.display = cart.length === 0 ? 'block' : 'none';
+  document.getElementById('checkoutView').style.display = cart.length === 0 ? 'none' : 'grid';
+  if (cart.length === 0) return;
+  renderCheckoutSummary();
+}
+
+document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const nameField = document.getElementById('ckName');
+  const phoneField = document.getElementById('ckPhone');
+  const addressField = document.getElementById('ckAddress');
+
+  const name = document.getElementById('ckNameInput').value.trim();
+  const phone = document.getElementById('ckPhoneInput').value.trim();
+  const address = document.getElementById('ckAddressInput').value.trim();
+
+  let valid = true;
+  nameField.classList.toggle('invalid', !name); if (!name) valid = false;
+  const phoneOk = /^[0-9]{10}$/.test(phone);
+  phoneField.classList.toggle('invalid', !phoneOk); if (!phoneOk) valid = false;
+  addressField.classList.toggle('invalid', !address); if (!address) valid = false;
+  if (!valid) return;
+
+  const orderId = 'SPX-' + Math.floor(10000 + Math.random() * 89999);
+  document.getElementById('confirmationText').textContent =
+    `Thanks ${name}! Your order #${orderId} (${money(cartSubtotal())}) will be delivered to "${address}".`;
+
+  clearCart();
+  document.getElementById('checkoutView').style.display = 'none';
+  document.getElementById('emptyCartNotice').style.display = 'none';
+  document.getElementById('confirmationView').style.display = 'block';
+});
+
+initCheckoutPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Shopnix</title>
+<meta name="description" content="Get in touch with the Shopnix team — we'd love to hear from you.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/contact.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contact Us — Shopnix">
+<meta property="og:description" content="Get in touch with the Shopnix team — we'd love to hear from you.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/contact.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-AfMyyUyxbcvgBLV9mYJquqg6TuDsrK57G6Skza9fguI='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Contact Us</div>
+    <h1>Contact Us</h1>
+    <p>We'd love to hear from you</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container split-layout">
+    <div class="form-card" style="max-width:none;">
+      <h2>Send a Message</h2>
+      <form id="contactForm" novalidate>
+        <div class="field" id="cName">
+          <label for="cNameInput">Name</label>
+          <input type="text" id="cNameInput" placeholder="Your name">
+          <div class="field-error">Please enter your name.</div>
+        </div>
+        <div class="field" id="cEmail">
+          <label for="cEmailInput">Email</label>
+          <input type="email" id="cEmailInput" placeholder="you@example.com">
+          <div class="field-error">Please enter a valid email address.</div>
+        </div>
+        <div class="field" id="cSubject">
+          <label for="cSubjectInput">Subject</label>
+          <input type="text" id="cSubjectInput" placeholder="How can we help?">
+          <div class="field-error">Please enter a subject.</div>
+        </div>
+        <div class="field" id="cMessage">
+          <label for="cMessageInput">Message</label>
+          <textarea id="cMessageInput" placeholder="Write your message..."></textarea>
+          <div class="field-error">Please enter a message.</div>
+        </div>
+        <button type="submit" class="btn btn-accent">Send Message</button>
+        <div class="form-alert" id="contactAlert"></div>
+      </form>
+    </div>
+
+    <div class="form-card" style="max-width:none;">
+      <h2>Get in Touch</h2>
+      <p class="form-sub">Customer support available 7 days a week.</p>
+      <p style="font-size:14px;margin-bottom:10px;"><b>📍 Address:</b><br>Shopnix House, Pulchowk, Lalitpur, Nepal</p>
+      <p style="font-size:14px;margin-bottom:10px;"><b>📞 Phone:</b><br>+977-1-5555123</p>
+      <p style="font-size:14px;"><b>✉️ Email:</b><br>support@shopnix.example</p>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+document.getElementById('contactForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fields = {
+    cName: document.getElementById('cNameInput').value.trim(),
+    cEmail: document.getElementById('cEmailInput').value.trim(),
+    cSubject: document.getElementById('cSubjectInput').value.trim(),
+    cMessage: document.getElementById('cMessageInput').value.trim(),
+  };
+  const alertEl = document.getElementById('contactAlert');
+
+  let valid = true;
+  document.getElementById('cName').classList.toggle('invalid', !fields.cName); if (!fields.cName) valid = false;
+  document.getElementById('cEmail').classList.toggle('invalid', !isValidEmail(fields.cEmail)); if (!isValidEmail(fields.cEmail)) valid = false;
+  document.getElementById('cSubject').classList.toggle('invalid', !fields.cSubject); if (!fields.cSubject) valid = false;
+  document.getElementById('cMessage').classList.toggle('invalid', !fields.cMessage); if (!fields.cMessage) valid = false;
+
+  if (!valid){
+    alertEl.textContent = 'Please fix the errors above.';
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
+  alertEl.textContent = `Thanks ${fields.cName}, we've received your message and will reply to ${fields.cEmail} soon.`;
+  alertEl.className = 'form-alert show success';
+  e.target.reset();
+});
+</script>
+</body>
+</html>

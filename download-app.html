@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download App — Shopnix</title>
+<meta name="description" content="Download the Shopnix app and shop faster with exclusive app-only deals.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/download-app.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Download App — Shopnix">
+<meta property="og:description" content="Download the Shopnix app and shop faster with exclusive app-only deals.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/download-app.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-1KTrccrNYuyHVLAZesWrNIG1NmyGCy/LGqSIVtmrnXw='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Download App</div>
+    <h1>Download the Shopnix App</h1>
+    <p>Shop faster with exclusive app-only deals</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container download-grid">
+    <div>
+      <h2>Why Use the App?</h2>
+      <div class="cat-grid" style="grid-template-columns:repeat(2,1fr);">
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">⚡</span>Faster flash sale alerts</div>
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">🎁</span>App-exclusive vouchers</div>
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">📍</span>Live order tracking</div>
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">🔒</span>Secure one-tap checkout</div>
+      </div>
+    </div>
+
+    <div class="qr-card">
+      <div class="qr-mock" aria-hidden="true"></div>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">Scan with your phone camera (demo only)</p>
+      <div class="app-badges" style="flex-direction:row;justify-content:center;flex-wrap:wrap;">
+        <a class="app-badge" href="#" id="playBtn">▶ Google Play</a>
+        <a class="app-badge" href="#" id="appStoreBtn"> App Store</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+['playBtn', 'appStoreBtn'].forEach(id => {
+  document.getElementById(id).addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('This is a demo — no real app download available.');
+  });
+});
+</script>
+</body>
+</html>

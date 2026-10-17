@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitleTag">Browse — Shopnix</title>
+<meta name="description" content="Browse Shopnix products by category and find exactly what you're looking for.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/category.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Browse — Shopnix">
+<meta property="og:description" content="Browse Shopnix products by category and find exactly what you're looking for.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/category.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-nhNirYw+BJp5UzYn7GkdOHfYlGUreJP37CR1QPyN2P4='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <span id="breadcrumbCurrent">Browse</span></div>
+    <h1 id="pageTitle">Browse</h1>
+    <p>Find exactly what you're looking for</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+    <div class="category-toolbar">
+      <span class="result-count" id="resultCount"></span>
+      <label>
+        Sort by:
+        <select id="sortSelect">
+          <option value="popularity">Popularity</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Rating</option>
+        </select>
+      </label>
+    </div>
+    <div class="product-grid" id="catProductGrid"></div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+function getQueryParams(){ return new URLSearchParams(window.location.search); }
+
+function renderSortedGrid(products, sort){
+  const sorted = products.slice();
+  if (sort === 'price-asc') sorted.sort((a, b) => a.price - b.price);
+  else if (sort === 'price-desc') sorted.sort((a, b) => b.price - a.price);
+  else if (sort === 'rating') sorted.sort((a, b) => b.rating - a.rating);
+  else sorted.sort((a, b) => b.reviews - a.reviews); // popularity (default)
+  renderGrid(document.getElementById('catProductGrid'), sorted);
+}
+
+function initCategoryPage(){
+  const params = getQueryParams();
+  const catSlug = params.get('cat');
+  const q = params.get('q');
+  let products, title;
+
+  if (q){
+    products = PRODUCTS.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
+    title = `Search results for "${q}"`;
+  } else if (catSlug && CATEGORIES.some(c => c.slug === catSlug)){
+    products = PRODUCTS.filter(p => p.category === catSlug);
+    title = categoryLabel(catSlug);
+  } else {
+    products = PRODUCTS;
+    title = 'All Products';
+  }
+
+  document.title = title + ' — Shopnix';
+  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('breadcrumbCurrent').textContent = title;
+  document.getElementById('resultCount').textContent =
+    products.length + (products.length === 1 ? ' product found' : ' products found');
+
+  renderSortedGrid(products, document.getElementById('sortSelect').value);
+  document.getElementById('sortSelect').addEventListener('change', (e) => {
+    renderSortedGrid(products, e.target.value);
+  });
+}
+
+initCategoryPage();
+</script>
+</body>
+</html>

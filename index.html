@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopnix — Online Shopping Nepal</title>
+<meta name="description" content="Shopnix - a Daraz-inspired marketplace clone with a custom teal &amp; coral theme.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/index.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shopnix — Online Shopping Nepal">
+<meta property="og:description" content="Shopnix - a Daraz-inspired marketplace clone with a custom teal &amp; coral theme.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/index.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+
+  <!-- ============ HERO SECTION ============ -->
+  <section class="hero">
+    <div class="container hero-grid">
+
+      <aside class="sidebar-cats">
+        <ul id="sidebarCatsList"></ul>
+      </aside>
+
+      <div class="carousel" id="carousel">
+        <div class="carousel-track" id="carouselTrack">
+          <div class="slide" style="background:linear-gradient(135deg,#0f6e5f,#13997f)">
+            <div class="slide-text">
+              <h2>Big Festival Sale</h2>
+              <p>Up to 60% off on top brands</p>
+              <a href="#justforyou" class="btn btn-accent">Shop Now</a>
+            </div>
+          </div>
+          <div class="slide" style="background:linear-gradient(135deg,#ff6b5b,#e14a39)">
+            <div class="slide-text">
+              <h2>New Arrivals</h2>
+              <p>Fresh styles added daily</p>
+              <a href="#justforyou" class="btn btn-dark">Explore</a>
+            </div>
+          </div>
+          <div class="slide" style="background:linear-gradient(135deg,#1f2937,#374151)">
+            <div class="slide-text">
+              <h2>Electronics Fest</h2>
+              <p>Smartphones, laptops &amp; more</p>
+              <a href="category.html?cat=electronics" class="btn btn-accent">Grab Deals</a>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-arrow prev" id="prevSlide" aria-label="Previous slide">&#10094;</button>
+        <button class="carousel-arrow next" id="nextSlide" aria-label="Next slide">&#10095;</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+
+      <div class="hero-side-banners">
+        <a class="side-banner" href="category.html?cat=beauty" style="background:linear-gradient(135deg,#13997f,#0b4f44)">
+          <h3>Beauty Picks</h3>
+          <p>From Rs. 299</p>
+        </a>
+        <a class="side-banner" href="#justforyou" style="background:linear-gradient(135deg,#ffb400,#e09400)">
+          <h3>Free Delivery</h3>
+          <p>On orders above Rs. 2000</p>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ FLASH SALE ============ -->
+  <section class="section flash-sale" id="flashsale">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-title-group">
+          <h2>⚡ Flash Sale</h2>
+          <div class="countdown" id="countdown">
+            <span class="cd-box"><b id="cdH">00</b>h</span>
+            <span class="cd-box"><b id="cdM">00</b>m</span>
+            <span class="cd-box"><b id="cdS">00</b>s</span>
+          </div>
+        </div>
+        <a href="#justforyou" class="see-all">See All &rsaquo;</a>
+      </div>
+
+      <div class="product-row" id="flashSaleRow"></div>
+    </div>
+  </section>
+
+  <!-- ============ CATEGORY ICON GRID ============ -->
+  <section class="section categories" id="categories">
+    <div class="container">
+      <h2 class="section-title-solo">Shop by Category</h2>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ PROMO BANNER STRIP ============ -->
+  <section class="section promo-strip">
+    <div class="container promo-grid">
+      <a class="promo-card" href="category.html?cat=electronics" style="background:linear-gradient(135deg,#0f6e5f,#13997f)">
+        <h3>Mobile Week</h3><p>Save up to Rs. 10,000</p>
+      </a>
+      <a class="promo-card" href="category.html?cat=beauty" style="background:linear-gradient(135deg,#ffb400,#e09400)">
+        <h3>Beauty Fest</h3><p>Buy 1 Get 1 Free</p>
+      </a>
+      <a class="promo-card" href="category.html?cat=home" style="background:linear-gradient(135deg,#ff6b5b,#e14a39)">
+        <h3>Home Makeover</h3><p>Flat 40% off</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ JUST FOR YOU ============ -->
+  <section class="section just-for-you" id="justforyou">
+    <div class="container">
+      <h2 class="section-title-solo">Just For You</h2>
+
+      <div class="tabs" id="tabsList"></div>
+
+      <div class="product-grid" id="productGrid"></div>
+
+      <div class="load-more-wrap">
+        <button class="btn btn-outline" id="loadMoreBtn">Load More</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEWSLETTER ============ -->
+  <section class="section newsletter">
+    <div class="container newsletter-inner">
+      <div>
+        <h2>Get Rs. 100 Off Your First Order</h2>
+        <p>Subscribe to our newsletter for exclusive deals</p>
+      </div>
+      <form id="newsletterForm" class="newsletter-form" novalidate>
+        <input type="email" id="newsletterEmail" placeholder="Enter your email address" aria-label="Email address">
+        <button type="submit" class="btn btn-accent">Subscribe</button>
+      </form>
+      <p class="form-msg" id="newsletterMsg" aria-live="polite"></p>
+    </div>
+  </section>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script src="home.js"></script>
+</body>
+</html>

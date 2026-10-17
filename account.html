@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — Shopnix</title>
+<meta name="description" content="Manage your Shopnix profile, orders and wishlist from your account dashboard.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/account.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="My Account — Shopnix">
+<meta property="og:description" content="Manage your Shopnix profile, orders and wishlist from your account dashboard.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/account.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-+5U9u+CsIb3lusJLEvf3x13lt1n3gtboGNvEYBDRQ/Y='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / My Account</div>
+    <h1>My Account</h1>
+    <p>Manage your profile, orders and wishlist</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+    <div id="loggedOutView" class="form-card" style="display:none;">
+      <h2>You're not logged in</h2>
+      <p class="form-sub">Login or create an account to see your profile, orders and wishlist.</p>
+      <a href="login.html" class="btn btn-accent">Login</a>
+      <p class="form-switch">New here? <a href="signup.html">Create an account</a></p>
+    </div>
+
+    <div id="loggedInView" class="form-card" style="display:none; max-width:560px;">
+      <h2 id="greetName">Hi there</h2>
+      <p class="form-sub" id="greetEmail"></p>
+      <div class="cat-grid" style="grid-template-columns:repeat(2,1fr);">
+        <a class="cat-item" href="orders.html"><span class="cat-icon">📦</span>My Orders</a>
+        <a class="cat-item" href="wishlist.html"><span class="cat-icon">❤️</span>My Wishlist</a>
+        <a class="cat-item" href="cart.html"><span class="cat-icon">🛒</span>My Cart</a>
+        <a class="cat-item" href="track-order.html"><span class="cat-icon">🚚</span>Track Order</a>
+      </div>
+      <button class="btn btn-outline" id="accountLogoutBtn" style="margin-top:20px;">Logout</button>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+function renderAccountPage(){
+  const user = getUser();
+  document.getElementById('loggedOutView').style.display = user ? 'none' : 'block';
+  document.getElementById('loggedInView').style.display = user ? 'block' : 'none';
+  if (user){
+    document.getElementById('greetName').textContent = `Hi, ${user.name}`;
+    document.getElementById('greetEmail').textContent = user.email;
+  }
+}
+document.getElementById('accountLogoutBtn').addEventListener('click', () => {
+  logoutUser();
+  showToast('Logged out');
+  renderAccountPage();
+});
+renderAccountPage();
+</script>
+</body>
+</html>

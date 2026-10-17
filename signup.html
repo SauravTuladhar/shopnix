@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — Shopnix</title>
+<meta name="description" content="Create a Shopnix account for exclusive deals and faster checkout.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/signup.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sign Up — Shopnix">
+<meta property="og:description" content="Create a Shopnix account for exclusive deals and faster checkout.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/signup.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-hoXvrkm5ycLIMogXac0P27SDxV2viXGHamYLkDzkDRA='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Sign Up</div>
+    <h1>Create Your Account</h1>
+    <p>Join Shopnix for exclusive deals and faster checkout</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+    <div class="form-card">
+      <h2>Sign Up</h2>
+      <p class="form-sub">It only takes a minute.</p>
+      <form id="signupForm" novalidate>
+        <div class="field" id="nameField">
+          <label for="signupName">Full Name</label>
+          <input type="text" id="signupName" placeholder="Your name">
+          <div class="field-error">Please enter your name.</div>
+        </div>
+        <div class="field" id="emailField">
+          <label for="signupEmail">Email Address</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com">
+          <div class="field-error">Please enter a valid email address.</div>
+        </div>
+        <div class="field" id="passwordField">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" placeholder="At least 6 characters">
+          <div class="field-error">Password must be at least 6 characters.</div>
+        </div>
+        <div class="field" id="confirmField">
+          <label for="signupConfirm">Confirm Password</label>
+          <input type="password" id="signupConfirm" placeholder="Re-enter your password">
+          <div class="field-error">Passwords do not match.</div>
+        </div>
+        <button type="submit" class="btn btn-accent">Create Account</button>
+        <div class="form-alert" id="signupAlert"></div>
+      </form>
+      <p class="form-switch">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+document.getElementById('signupForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const nameField = document.getElementById('nameField');
+  const emailField = document.getElementById('emailField');
+  const passwordField = document.getElementById('passwordField');
+  const confirmField = document.getElementById('confirmField');
+
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  const alertEl = document.getElementById('signupAlert');
+
+  let valid = true;
+  nameField.classList.toggle('invalid', name.length === 0); if (!name) valid = false;
+  emailField.classList.toggle('invalid', !isValidEmail(email)); if (!isValidEmail(email)) valid = false;
+  passwordField.classList.toggle('invalid', password.length < 6); if (password.length < 6) valid = false;
+  confirmField.classList.toggle('invalid', confirm !== password || !confirm); if (confirm !== password || !confirm) valid = false;
+
+  if (!valid){
+    alertEl.textContent = 'Please fix the errors above.';
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
+  setUser({ name, email });
+  alertEl.textContent = `Account created! Welcome, ${name}. Redirecting...`;
+  alertEl.className = 'form-alert show success';
+  setTimeout(() => { window.location.href = 'account.html'; }, 900);
+});
+</script>
+</body>
+</html>

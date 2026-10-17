@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sauravtuladhar.github.io/shopnix/sitemap.xml

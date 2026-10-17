@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Returns &amp; Refund — Shopnix</title>
+<meta name="description" content="Shopnix's hassle-free return and refund policy.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/returns.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Returns &amp; Refund — Shopnix">
+<meta property="og:description" content="Shopnix's hassle-free return and refund policy.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/returns.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-NioOvDIXx53NH+H4C07ZPJIKY85JzBhFlm8eMAw4294='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Returns &amp; Refund</div>
+    <h1>Returns &amp; Refund</h1>
+    <p>Our hassle-free return policy</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container split-layout">
+    <div>
+      <h2>Return Policy</h2>
+      <p>Most items purchased on Shopnix can be returned within 7 days of delivery if they are unused, in original packaging, and accompanied by the receipt.</p>
+      <p>Refunds are processed back to your original payment method (or as account credit for Cash on Delivery orders) within 5-7 business days of us receiving the returned item.</p>
+      <p>Perishables, intimate apparel, and personal care items opened after delivery are not eligible for return.</p>
+    </div>
+
+    <div class="form-card" style="max-width:none;">
+      <h2>Start a Return</h2>
+      <form id="returnForm" novalidate>
+        <div class="field" id="returnOrderField">
+          <label for="returnOrderId">Order ID</label>
+          <input type="text" id="returnOrderId" placeholder="e.g. SPX-10234">
+          <div class="field-error">Please enter your order ID.</div>
+        </div>
+        <div class="field" id="returnReasonField">
+          <label for="returnReason">Reason for Return</label>
+          <textarea id="returnReason" placeholder="Tell us what went wrong"></textarea>
+          <div class="field-error">Please tell us the reason.</div>
+        </div>
+        <button type="submit" class="btn btn-accent">Submit Return Request</button>
+        <div class="form-alert" id="returnAlert"></div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+document.getElementById('returnForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const orderField = document.getElementById('returnOrderField');
+  const reasonField = document.getElementById('returnReasonField');
+  const orderId = document.getElementById('returnOrderId').value.trim();
+  const reason = document.getElementById('returnReason').value.trim();
+  const alertEl = document.getElementById('returnAlert');
+
+  let valid = true;
+  orderField.classList.toggle('invalid', !orderId); if (!orderId) valid = false;
+  reasonField.classList.toggle('invalid', !reason); if (!reason) valid = false;
+  if (!valid){
+    alertEl.textContent = 'Please fix the errors above.';
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
+  alertEl.textContent = `Return request for order #${orderId.toUpperCase()} submitted. We'll email you a shipping label shortly.`;
+  alertEl.className = 'form-alert show success';
+  e.target.reset();
+});
+</script>
+</body>
+</html>

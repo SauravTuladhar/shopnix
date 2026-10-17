@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Shopnix</title>
+<meta name="description" content="Login to your Shopnix account to continue shopping.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/login.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Login — Shopnix">
+<meta property="og:description" content="Login to your Shopnix account to continue shopping.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/login.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-VqwgDG8uapIsnNkrfj/GLeyAe3IsZmVs+FTslYJXWLM='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Login</div>
+    <h1>Welcome Back</h1>
+    <p>Login to continue shopping on Shopnix</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+    <div class="form-card">
+      <h2>Login</h2>
+      <p class="form-sub">Enter your credentials to access your account.</p>
+      <form id="loginForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com">
+          <div class="field-error">Please enter a valid email address.</div>
+        </div>
+        <div class="field" id="passwordField">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password">
+          <div class="field-error">Password must be at least 4 characters.</div>
+        </div>
+        <button type="submit" class="btn btn-accent">Login</button>
+        <div class="form-alert" id="loginAlert"></div>
+      </form>
+      <p class="form-switch">New to Shopnix? <a href="signup.html">Create an account</a></p>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const emailField = document.getElementById('emailField');
+  const passwordField = document.getElementById('passwordField');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const alertEl = document.getElementById('loginAlert');
+
+  let valid = true;
+  emailField.classList.toggle('invalid', !isValidEmail(email));
+  if (!isValidEmail(email)) valid = false;
+  passwordField.classList.toggle('invalid', password.length < 4);
+  if (password.length < 4) valid = false;
+
+  if (!valid){
+    alertEl.textContent = 'Please fix the errors above.';
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
+  const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  setUser({ name, email });
+  alertEl.textContent = `Welcome back, ${name}! Redirecting...`;
+  alertEl.className = 'form-alert show success';
+  setTimeout(() => { window.location.href = 'account.html'; }, 900);
+});
+</script>
+</body>
+</html>

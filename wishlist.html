@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Wishlist — Shopnix</title>
+<meta name="description" content="View and manage the items you've saved for later on Shopnix.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/wishlist.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="My Wishlist — Shopnix">
+<meta property="og:description" content="View and manage the items you've saved for later on Shopnix.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/wishlist.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-uTX9yF7wnkTdZSfhavZmRil2iVsCc7JQcOmJ1zO/Ks8='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / My Wishlist</div>
+    <h1>My Wishlist</h1>
+    <p>Items you've saved for later</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+    <div class="product-grid" id="wishlistGrid"></div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+function renderWishlistPage(){
+  const ids = getWishlist();
+  const grid = document.getElementById('wishlistGrid');
+  if (ids.length === 0){
+    grid.innerHTML = '<p class="empty-state">Your wishlist is empty. <a href="index.html">Continue shopping &rsaquo;</a></p>';
+    return;
+  }
+  const products = ids.map(getProductById).filter(Boolean);
+  renderGrid(grid, products);
+}
+
+// Re-render this page whenever a wish-toggle is clicked (common.js updates storage first).
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.wish-toggle')) renderWishlistPage();
+});
+
+renderWishlistPage();
+</script>
+</body>
+</html>

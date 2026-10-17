@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell on Shopnix</title>
+<meta name="description" content="Sell on Shopnix and reach thousands of shoppers across Nepal.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/seller.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sell on Shopnix">
+<meta property="og:description" content="Sell on Shopnix and reach thousands of shoppers across Nepal.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/seller.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-wDwrKLy01M3oCzWkzkXFXgmRWWLt8qvYQn6Gva+AVXs='; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="index.html">Home</a> / Sell on Shopnix</div>
+    <h1>Sell on Shopnix</h1>
+    <p>Reach thousands of shoppers across Nepal</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container split-layout">
+    <div>
+      <h2>Why Sell With Us?</h2>
+      <div class="cat-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">📈</span>Low commission &amp; fast payouts</div>
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">🚚</span>Nationwide logistics support</div>
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">🛠️</span>Easy-to-use seller tools</div>
+        <div class="cat-item" style="cursor:default;"><span class="cat-icon">🤝</span>Dedicated seller support</div>
+      </div>
+      <p style="margin-top:20px;">Fill in the form to register your interest — our seller onboarding team will reach out within 2 business days.</p>
+    </div>
+
+    <div class="form-card" style="max-width:none;">
+      <h2>Seller Registration</h2>
+      <form id="sellerForm" novalidate>
+        <div class="field" id="sBusiness">
+          <label for="sBusinessInput">Business Name</label>
+          <input type="text" id="sBusinessInput" placeholder="Your business name">
+          <div class="field-error">Please enter your business name.</div>
+        </div>
+        <div class="field" id="sEmail">
+          <label for="sEmailInput">Email Address</label>
+          <input type="email" id="sEmailInput" placeholder="you@example.com">
+          <div class="field-error">Please enter a valid email address.</div>
+        </div>
+        <div class="field" id="sPhone">
+          <label for="sPhoneInput">Phone Number</label>
+          <input type="tel" id="sPhoneInput" placeholder="98XXXXXXXX">
+          <div class="field-error">Please enter a valid 10-digit phone number.</div>
+        </div>
+        <div class="field">
+          <label for="sCategoryInput">Primary Category</label>
+          <select id="sCategoryInput"></select>
+        </div>
+        <button type="submit" class="btn btn-accent">Register as Seller</button>
+        <div class="form-alert" id="sellerAlert"></div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="partials.js"></script>
+<script src="products.js"></script>
+<script src="common.js"></script>
+<script>
+document.getElementById('sCategoryInput').innerHTML = CATEGORIES.map(c => `<option value="${c.slug}">${c.label}</option>`).join('');
+
+document.getElementById('sellerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const business = document.getElementById('sBusinessInput').value.trim();
+  const email = document.getElementById('sEmailInput').value.trim();
+  const phone = document.getElementById('sPhoneInput').value.trim();
+  const alertEl = document.getElementById('sellerAlert');
+
+  let valid = true;
+  document.getElementById('sBusiness').classList.toggle('invalid', !business); if (!business) valid = false;
+  document.getElementById('sEmail').classList.toggle('invalid', !isValidEmail(email)); if (!isValidEmail(email)) valid = false;
+  const phoneOk = /^[0-9]{10}$/.test(phone);
+  document.getElementById('sPhone').classList.toggle('invalid', !phoneOk); if (!phoneOk) valid = false;
+
+  if (!valid){
+    alertEl.textContent = 'Please fix the errors above.';
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
+  alertEl.textContent = `Thanks, ${business}! We'll contact you at ${email} within 2 business days.`;
+  alertEl.className = 'form-alert show success';
+  e.target.reset();
+});
+</script>
+</body>
+</html>
