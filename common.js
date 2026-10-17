@@ -35,7 +35,7 @@ function money(n){ return 'Rs. ' + Number(n).toLocaleString('en-IN'); }
 
 /* ===================== CART OPERATIONS ===================== */
 function addToCart(id, qty){
-  qty = qty || 1;
+  qty = (qty === undefined || qty === null) ? 1 : qty;
   const cart = getCart();
   const existing = cart.find(c => c.id === id);
   if (existing) existing.qty += qty;
@@ -54,7 +54,7 @@ function removeFromCart(id){
   setCart(getCart().filter(c => c.id !== id));
 }
 function cartTotalQty(){
-  return getCart().reduce((sum, c) => sum + c.qty, 0);
+  return getCart().reduce((sum, c) => getProductById(c.id) ? sum + c.qty : sum, 0);
 }
 function cartSubtotal(){
   return getCart().reduce((sum, c) => {
@@ -129,9 +129,14 @@ document.addEventListener('click', (e) => {
     const card = wishBtn.closest('.product-card');
     const id = card.dataset.id;
     const p = getProductById(id);
+    if (!p) return;
     const added = toggleWishlist(id);
-    wishBtn.classList.toggle('active', added);
-    wishBtn.innerHTML = added ? '&#9829;' : '&#9825;';
+    // Update every card showing this product (e.g. it may appear in both
+    // the flash-sale row and the main grid at once), not just the clicked one.
+    document.querySelectorAll(`.product-card[data-id="${id}"] .wish-toggle`).forEach(btn => {
+      btn.classList.toggle('active', added);
+      btn.innerHTML = added ? '&#9829;' : '&#9825;';
+    });
     showToast(added ? `Added "${p.name}" to wishlist` : `Removed "${p.name}" from wishlist`);
     return;
   }
@@ -140,6 +145,7 @@ document.addEventListener('click', (e) => {
     const card = addBtn.closest('.product-card');
     const id = card.dataset.id;
     const p = getProductById(id);
+    if (!p) return;
     addToCart(id, 1);
     showToast(`"${p.name}" added to cart`);
     const original = addBtn.textContent;
@@ -156,14 +162,7 @@ function renderCartDrawer(){
   const cartSubtotalEl = document.getElementById('cartSubtotal');
   if (!cartItemsWrap || !cartSubtotalEl) return;
 
-  const cart = getCart();
-  if (cart.length === 0){
-    cartItemsWrap.innerHTML = '<p class="cart-empty">Your cart is empty.</p>';
-    cartSubtotalEl.textContent = money(0);
-    return;
-  }
-
-  cartItemsWrap.innerHTML = cart.map(c => {
+  const rows = getCart().map(c => {
     const p = getProductById(c.id);
     if (!p) return '';
     return `
@@ -181,7 +180,15 @@ function renderCartDrawer(){
         <button class="cart-item-remove" type="button">Remove</button>
       </div>
     `;
-  }).join('');
+  }).filter(Boolean);
+
+  if (rows.length === 0){
+    cartItemsWrap.innerHTML = '<p class="cart-empty">Your cart is empty.</p>';
+    cartSubtotalEl.textContent = money(0);
+    return;
+  }
+
+  cartItemsWrap.innerHTML = rows.join('');
   cartSubtotalEl.textContent = money(cartSubtotal());
 }
 

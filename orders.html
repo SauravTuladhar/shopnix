@@ -12,7 +12,7 @@
 <meta property="og:description" content="Track and review your past purchases on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/orders.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-oL+A7xbdMrgaueqFidHXT+Bn4iDBMw5pfOA/JWfMlIU='; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-DiZtlK46rqTZC2CR33NJ+hRYF60pkxBQogyis7eu79E='; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,6 +29,12 @@
 
 <main class="page-content">
   <div class="container">
+    <div id="loggedOutView" class="form-card" style="display:none;">
+      <h2>You're not logged in</h2>
+      <p class="form-sub">Login to see your past orders.</p>
+      <a href="login.html" class="btn btn-accent">Login</a>
+      <p class="form-switch">New here? <a href="signup.html">Create an account</a></p>
+    </div>
     <div id="ordersList"></div>
   </div>
 </main>
@@ -56,6 +62,13 @@ const STATUS_CLASS = {
 
 function renderOrders(){
   const wrap = document.getElementById('ordersList');
+  const loggedOutView = document.getElementById('loggedOutView');
+  const user = getUser();
+
+  loggedOutView.style.display = user ? 'none' : 'block';
+  wrap.style.display = user ? 'block' : 'none';
+  if (!user) return;
+
   wrap.innerHTML = SAMPLE_ORDERS.map(o => `
     <div class="order-card">
       <div class="order-info">
