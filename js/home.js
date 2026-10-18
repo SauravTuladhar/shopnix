@@ -168,7 +168,7 @@ loadCatalog().then(() => {
   renderJustForYou();
   initLoadMore();
   handleHomeDeepLink();
-});
+}).catch(showCatalogError);
 initCarousel();
 initCountdown();
 initNewsletter();

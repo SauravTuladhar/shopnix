@@ -75,6 +75,23 @@ function toggleWishlist(id){
   return idx === -1; // true if just added
 }
 
+/* ===================== CATALOG ERROR ===================== */
+// loadCatalog() rejects if the Supabase fetch fails (network, RLS, project
+// paused, etc.) — every page that awaits it funnels failures here so the
+// user sees a clear message and a way to recover, instead of a silently
+// empty page with a swallowed promise rejection.
+function showCatalogError(err){
+  console.error('Failed to load catalog:', err);
+  if (document.getElementById('catalogErrorBanner')) return; // already shown
+  document.body.insertAdjacentHTML('afterbegin',
+    `<div id="catalogErrorBanner" class="catalog-error-banner">
+      <span>We couldn't load the product catalog. Check your connection and try again.</span>
+      <button type="button" id="catalogErrorRetry">Retry</button>
+    </div>`
+  );
+  document.getElementById('catalogErrorRetry').addEventListener('click', () => window.location.reload());
+}
+
 /* ===================== TOAST ===================== */
 function showToast(msg){
   const toastEl = document.getElementById('toast');
@@ -388,4 +405,4 @@ function showFieldMsg(el, msg, type){
   el.className = 'form-msg ' + (type || '');
 }
 
-loadCatalog().then(initHeader);
+loadCatalog().then(initHeader).catch(showCatalogError);

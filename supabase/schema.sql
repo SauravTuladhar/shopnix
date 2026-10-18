@@ -51,7 +51,7 @@ create table wishlist_items (
 
 create table orders (
   id uuid primary key default gen_random_uuid(),
-  order_code text not null,
+  order_code text not null unique,
   user_id uuid not null references auth.users(id) on delete cascade,
   created_at timestamptz not null default now(),
   status text not null default 'Processing',
@@ -69,6 +69,14 @@ create table order_items (
   qty int not null,
   price_at_purchase numeric not null
 );
+
+-- Postgres doesn't auto-index FK columns (only PKs); these two are read on
+-- every RLS check for orders/order_items, so they need an explicit index.
+-- (cart_items/wishlist_items don't need one here: their existing
+-- `unique (user_id, product_id)` constraint already indexes user_id as its
+-- leading column.)
+create index orders_user_id_idx on orders(user_id);
+create index order_items_order_id_idx on order_items(order_id);
 
 -- ===================== AUTO-CREATE PROFILE ON SIGNUP =====================
 -- The frontend passes { data: { name } } to supabase.auth.signUp(); this

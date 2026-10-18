@@ -1,2 +1,23 @@
 .DS_Store
 .claude/
+
+# Editors
+.vscode/
+.idea/
+
+# Local env / secrets
+.env
+.env.local
+
+# Node (if anything is ever installed for local tooling, e.g. Playwright)
+node_modules/
+npm-debug.log*
+
+# Python (e.g. ad-hoc scripts using python-docx)
+__pycache__/
+*.pyc
+
+# Office lock/temp files
+~$*.docx
+~$*.xlsx
+~$*.pptx

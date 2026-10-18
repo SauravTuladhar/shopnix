@@ -6,7 +6,17 @@
    category,img,rating,reviews,flash,sold}) so every existing consumer
    (productCardHTML, cart/wishlist rendering, home.js, etc.) needed zero
    changes. CATEGORIES/PRODUCTS are empty until loadCatalog()'s promise
-   resolves — every page's init sequence awaits it first (see common.js). */
+   resolves — every page's init sequence awaits it first (see common.js).
+
+   loadCatalog() is memoized (_catalogPromise) and deliberately does NOT
+   reset itself on failure: several scripts on the same page (this file,
+   common.js, and home.js or a page's inline script) all call loadCatalog()
+   during the initial page-load burst, and a fast failure (e.g. an aborted
+   request) can reject before the next caller runs. If the promise reset
+   itself, each of those callers would race into triggering its own
+   duplicate fetch. Instead every caller shares one settled promise, and
+   `showCatalogError`'s "Retry" button reloads the page — which is what
+   actually clears this cache and tries again. */
 let CATEGORIES = [];
 let PRODUCTS = [];
 let _catalogPromise = null;
@@ -25,9 +35,6 @@ function loadCatalog(){
       category: p.category_slug, img: p.img, rating: p.rating,
       reviews: p.reviews, flash: p.flash, sold: p.sold,
     }));
-  }).catch(err => {
-    _catalogPromise = null; // allow retry on next call instead of caching a failure
-    throw err;
   });
   return _catalogPromise;
 }
