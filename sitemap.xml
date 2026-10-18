@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://sauravtuladhar.github.io/shopnix/index.html</loc><priority>1.0</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/category.html</loc><priority>0.9</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/cart.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/checkout.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/wishlist.html</loc><priority>0.4</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/login.html</loc><priority>0.4</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/signup.html</loc><priority>0.4</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/account.html</loc><priority>0.3</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/orders.html</loc><priority>0.3</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/track-order.html</loc><priority>0.4</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/about.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/contact.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/careers.html</loc><priority>0.3</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/blog.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/help-center.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/how-to-buy.html</loc><priority>0.5</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/returns.html</loc><priority>0.4</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/seller.html</loc><priority>0.4</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/download-app.html</loc><priority>0.3</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/terms.html</loc><priority>0.2</priority></url>
-  <url><loc>https://sauravtuladhar.github.io/shopnix/privacy.html</loc><priority>0.2</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/shop/category.html</loc><priority>0.9</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/shop/cart.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/shop/checkout.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/shop/wishlist.html</loc><priority>0.4</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/account/login.html</loc><priority>0.4</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/account/signup.html</loc><priority>0.4</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/account/account.html</loc><priority>0.3</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/account/orders.html</loc><priority>0.3</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/account/track-order.html</loc><priority>0.4</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/about.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/contact.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/careers.html</loc><priority>0.3</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/blog.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/help-center.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/how-to-buy.html</loc><priority>0.5</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/returns.html</loc><priority>0.4</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/seller.html</loc><priority>0.4</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/download-app.html</loc><priority>0.3</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/terms.html</loc><priority>0.2</priority></url>
+  <url><loc>https://sauravtuladhar.github.io/shopnix/info/privacy.html</loc><priority>0.2</priority></url>
 </urlset>

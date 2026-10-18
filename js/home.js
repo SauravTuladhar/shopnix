@@ -63,7 +63,7 @@ function initCountdown(){
 function renderSidebarCats(){
   const el = document.getElementById('sidebarCatsList');
   if (!el) return;
-  el.innerHTML = CATEGORIES.map(c => `<li><a href="category.html?cat=${c.slug}">${c.label}</a></li>`).join('');
+  el.innerHTML = CATEGORIES.map(c => `<li><a href="shop/category.html?cat=${c.slug}">${c.label}</a></li>`).join('');
 }
 
 /* ---- Category icon grid ---- */

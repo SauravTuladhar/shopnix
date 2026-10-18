@@ -1,16 +1,25 @@
 /* ===================== SHARED HEADER / FOOTER / OVERLAYS ===================== */
 /* Injected via plain innerHTML (no fetch) so pages work over file:// too. */
 
+/* Pages live at different folder depths (root, shop/, account/, info/) but all
+   load this same file, so every internal link below is prefixed with ROOT_PATH
+   (derived from this script's own <script src="..."> so it needs no per-page
+   setup) rather than hardcoded as root-relative. */
+const ROOT_PATH = (() => {
+  const s = document.currentScript || document.querySelector('script[src$="js/partials.js"]');
+  return s ? s.getAttribute('src').replace(/js\/partials\.js$/, '') : '';
+})();
+
 const HEADER_HTML = `
 <div class="topbar">
   <div class="container topbar-inner">
     <div class="topbar-left">
-      <a href="download-app.html">Download App</a>
-      <a href="seller.html">Sell on Shopnix</a>
+      <a href="${ROOT_PATH}info/download-app.html">Download App</a>
+      <a href="${ROOT_PATH}info/seller.html">Sell on Shopnix</a>
     </div>
     <div class="topbar-right">
-      <a href="help-center.html">Customer Care</a>
-      <a href="track-order.html">Track Order</a>
+      <a href="${ROOT_PATH}info/help-center.html">Customer Care</a>
+      <a href="${ROOT_PATH}account/track-order.html">Track Order</a>
       <label class="select-wrap">
         <select aria-label="Language">
           <option>English</option>
@@ -28,7 +37,7 @@ const HEADER_HTML = `
         <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
 
-      <a href="index.html" class="logo">Shop<span>nix</span></a>
+      <a href="${ROOT_PATH}index.html" class="logo">Shop<span>nix</span></a>
 
       <div class="search-wrap" id="searchWrap">
         <form id="searchForm" autocomplete="off">
@@ -48,21 +57,21 @@ const HEADER_HTML = `
           </button>
           <div class="dropdown" id="accountDropdown">
             <div id="guestLinks">
-              <a href="login.html">Login</a>
-              <a href="signup.html">Sign Up</a>
+              <a href="${ROOT_PATH}account/login.html">Login</a>
+              <a href="${ROOT_PATH}account/signup.html">Sign Up</a>
             </div>
             <div id="userLinks" style="display:none">
               <div class="dd-greeting" id="ddGreeting">Hi there</div>
-              <a href="account.html">My Account</a>
-              <a href="orders.html">My Orders</a>
-              <a href="wishlist.html">My Wishlist</a>
+              <a href="${ROOT_PATH}account/account.html">My Account</a>
+              <a href="${ROOT_PATH}account/orders.html">My Orders</a>
+              <a href="${ROOT_PATH}shop/wishlist.html">My Wishlist</a>
               <hr>
               <button class="dd-logout" id="logoutBtn" type="button">Logout</button>
             </div>
           </div>
         </div>
 
-        <a class="action-btn" id="wishlistBtn" href="wishlist.html">
+        <a class="action-btn" id="wishlistBtn" href="${ROOT_PATH}shop/wishlist.html">
           <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.2C.4 8.2 2 4.5 5.6 4c2-.3 3.8.7 4.9 2.4C11.6 4.7 13.4 3.7 15.4 4c3.6.5 5.2 4.2 3.6 7.8C19.5 16.4 12 21 12 21z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
           <span>Wishlist</span>
           <span class="badge" id="wishlistBadge">0</span>
@@ -97,19 +106,19 @@ const FOOTER_HTML = `
 <div class="container footer-grid">
   <div class="footer-col">
     <h4>Customer Care</h4>
-    <a href="help-center.html">Help Center</a>
-    <a href="how-to-buy.html">How to Buy</a>
-    <a href="returns.html">Returns &amp; Refund</a>
-    <a href="track-order.html">Track Order</a>
-    <a href="contact.html">Contact Us</a>
+    <a href="${ROOT_PATH}info/help-center.html">Help Center</a>
+    <a href="${ROOT_PATH}info/how-to-buy.html">How to Buy</a>
+    <a href="${ROOT_PATH}info/returns.html">Returns &amp; Refund</a>
+    <a href="${ROOT_PATH}account/track-order.html">Track Order</a>
+    <a href="${ROOT_PATH}info/contact.html">Contact Us</a>
   </div>
   <div class="footer-col">
     <h4>Shopnix</h4>
-    <a href="about.html">About Us</a>
-    <a href="careers.html">Careers</a>
-    <a href="blog.html">Shopnix Blog</a>
-    <a href="terms.html">Terms &amp; Conditions</a>
-    <a href="privacy.html">Privacy Policy</a>
+    <a href="${ROOT_PATH}info/about.html">About Us</a>
+    <a href="${ROOT_PATH}info/careers.html">Careers</a>
+    <a href="${ROOT_PATH}info/blog.html">Shopnix Blog</a>
+    <a href="${ROOT_PATH}info/terms.html">Terms &amp; Conditions</a>
+    <a href="${ROOT_PATH}info/privacy.html">Privacy Policy</a>
   </div>
   <div class="footer-col">
     <h4>Payment</h4>
@@ -126,8 +135,8 @@ const FOOTER_HTML = `
   <div class="footer-col">
     <h4>Download App</h4>
     <div class="app-badges">
-      <a class="app-badge" href="download-app.html">▶ Google Play</a>
-      <a class="app-badge" href="download-app.html"> App Store</a>
+      <a class="app-badge" href="${ROOT_PATH}info/download-app.html">▶ Google Play</a>
+      <a class="app-badge" href="${ROOT_PATH}info/download-app.html"> App Store</a>
     </div>
   </div>
 </div>
@@ -158,8 +167,8 @@ const EXTRAS_HTML = `
   </div>
   <div class="cart-footer">
     <div class="cart-subtotal">Subtotal: <b id="cartSubtotal">Rs. 0</b></div>
-    <a class="btn btn-outline cart-view-full" href="cart.html">View Full Cart</a>
-    <a class="btn btn-accent cart-checkout" href="checkout.html">Checkout</a>
+    <a class="btn btn-outline cart-view-full" href="${ROOT_PATH}shop/cart.html">View Full Cart</a>
+    <a class="btn btn-accent cart-checkout" href="${ROOT_PATH}shop/checkout.html">Checkout</a>
   </div>
 </div>
 <div class="overlay" id="cartOverlay"></div>

@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout — Shopnix</title>
 <meta name="description" content="Enter your delivery details and complete your order on Shopnix.">
-<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/checkout.html">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/shop/checkout.html">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Checkout — Shopnix">
 <meta property="og:description" content="Enter your delivery details and complete your order on Shopnix.">
-<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/checkout.html">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/checkout.html">
 <meta name="twitter:card" content="summary">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-Hf0k6NgmnXgZM2RsU/he9/FbfI4pElxfoRrD3N/JnVw='; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
@@ -21,7 +21,7 @@
 
 <section class="page-hero">
   <div class="container">
-    <div class="breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
+    <div class="breadcrumb"><a href="../index.html">Home</a> / <a href="cart.html">Cart</a> / Checkout</div>
     <h1>Checkout</h1>
     <p>Enter your delivery details to place your order</p>
   </div>
@@ -33,7 +33,7 @@
     <div id="emptyCartNotice" class="form-card" style="display:none;">
       <h2>Your cart is empty</h2>
       <p class="form-sub">Add a few products before checking out.</p>
-      <a href="index.html" class="btn btn-accent">Start Shopping</a>
+      <a href="../index.html" class="btn btn-accent">Start Shopping</a>
     </div>
 
     <div id="checkoutView" class="split-layout" style="display:none;">
@@ -80,7 +80,7 @@
       <div class="check-circle">&#10003;</div>
       <h2>Order Placed!</h2>
       <p id="confirmationText"></p>
-      <a href="index.html" class="btn btn-accent">Continue Shopping</a>
+      <a href="../index.html" class="btn btn-accent">Continue Shopping</a>
     </div>
 
   </div>
@@ -88,9 +88,9 @@
 
 <div id="site-footer"></div>
 
-<script src="js/partials.js"></script>
-<script src="js/products.js"></script>
-<script src="js/common.js"></script>
+<script src="../js/partials.js"></script>
+<script src="../js/products.js"></script>
+<script src="../js/common.js"></script>
 <script>
 function renderCheckoutSummary(){
   const cart = getCart();

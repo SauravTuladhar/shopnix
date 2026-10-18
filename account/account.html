@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account — Shopnix</title>
 <meta name="description" content="Manage your Shopnix profile, orders and wishlist from your account dashboard.">
-<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/account.html">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/account/account.html">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="My Account — Shopnix">
 <meta property="og:description" content="Manage your Shopnix profile, orders and wishlist from your account dashboard.">
-<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/account.html">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/account/account.html">
 <meta name="twitter:card" content="summary">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-+5U9u+CsIb3lusJLEvf3x13lt1n3gtboGNvEYBDRQ/Y='; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
@@ -21,7 +21,7 @@
 
 <section class="page-hero">
   <div class="container">
-    <div class="breadcrumb"><a href="index.html">Home</a> / My Account</div>
+    <div class="breadcrumb"><a href="../index.html">Home</a> / My Account</div>
     <h1>My Account</h1>
     <p>Manage your profile, orders and wishlist</p>
   </div>
@@ -41,8 +41,8 @@
       <p class="form-sub" id="greetEmail"></p>
       <div class="cat-grid" style="grid-template-columns:repeat(2,1fr);">
         <a class="cat-item" href="orders.html"><span class="cat-icon">📦</span>My Orders</a>
-        <a class="cat-item" href="wishlist.html"><span class="cat-icon">❤️</span>My Wishlist</a>
-        <a class="cat-item" href="cart.html"><span class="cat-icon">🛒</span>My Cart</a>
+        <a class="cat-item" href="../shop/wishlist.html"><span class="cat-icon">❤️</span>My Wishlist</a>
+        <a class="cat-item" href="../shop/cart.html"><span class="cat-icon">🛒</span>My Cart</a>
         <a class="cat-item" href="track-order.html"><span class="cat-icon">🚚</span>Track Order</a>
       </div>
       <button class="btn btn-outline" id="accountLogoutBtn" style="margin-top:20px;">Logout</button>
@@ -52,9 +52,9 @@
 
 <div id="site-footer"></div>
 
-<script src="js/partials.js"></script>
-<script src="js/products.js"></script>
-<script src="js/common.js"></script>
+<script src="../js/partials.js"></script>
+<script src="../js/products.js"></script>
+<script src="../js/common.js"></script>
 <script>
 function renderAccountPage(){
   const user = getUser();

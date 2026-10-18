@@ -218,25 +218,25 @@ function renderCategoryNav(){
 
   if (categoryList){
     categoryList.innerHTML =
-      `<li><a href="index.html#flashsale">Flash Sale</a></li>` +
-      CATEGORIES.map(c => `<li><a href="category.html?cat=${c.slug}">${c.label}</a></li>`).join('') +
-      `<li><a href="index.html#justforyou">Just For You</a></li>`;
+      `<li><a href="${ROOT_PATH}index.html#flashsale">Flash Sale</a></li>` +
+      CATEGORIES.map(c => `<li><a href="${ROOT_PATH}shop/category.html?cat=${c.slug}">${c.label}</a></li>`).join('') +
+      `<li><a href="${ROOT_PATH}index.html#justforyou">Just For You</a></li>`;
   }
   if (megaMenuList){
-    megaMenuList.innerHTML = CATEGORIES.map(c => `<li><a href="category.html?cat=${c.slug}">${c.icon} ${c.label}</a></li>`).join('');
+    megaMenuList.innerHTML = CATEGORIES.map(c => `<li><a href="${ROOT_PATH}shop/category.html?cat=${c.slug}">${c.icon} ${c.label}</a></li>`).join('');
   }
   if (mobileMenuList){
     const user = getUser();
     mobileMenuList.innerHTML =
-      `<li><a href="index.html">Home</a></li>` +
-      `<li><a href="index.html#flashsale">Flash Sale</a></li>` +
-      CATEGORIES.map(c => `<li><a href="category.html?cat=${c.slug}">${c.label}</a></li>`).join('') +
-      `<li><a href="index.html#justforyou">Just For You</a></li>` +
-      `<li><a href="wishlist.html">Wishlist</a></li>` +
-      `<li><a href="cart.html">Cart</a></li>` +
+      `<li><a href="${ROOT_PATH}index.html">Home</a></li>` +
+      `<li><a href="${ROOT_PATH}index.html#flashsale">Flash Sale</a></li>` +
+      CATEGORIES.map(c => `<li><a href="${ROOT_PATH}shop/category.html?cat=${c.slug}">${c.label}</a></li>`).join('') +
+      `<li><a href="${ROOT_PATH}index.html#justforyou">Just For You</a></li>` +
+      `<li><a href="${ROOT_PATH}shop/wishlist.html">Wishlist</a></li>` +
+      `<li><a href="${ROOT_PATH}shop/cart.html">Cart</a></li>` +
       (user
-        ? `<li><a href="account.html">My Account</a></li><li><a href="orders.html">My Orders</a></li><li><a href="#" id="mobileLogoutLink">Logout</a></li>`
-        : `<li><a href="login.html">Login</a></li><li><a href="signup.html">Sign Up</a></li>`);
+        ? `<li><a href="${ROOT_PATH}account/account.html">My Account</a></li><li><a href="${ROOT_PATH}account/orders.html">My Orders</a></li><li><a href="#" id="mobileLogoutLink">Logout</a></li>`
+        : `<li><a href="${ROOT_PATH}account/login.html">Login</a></li><li><a href="${ROOT_PATH}account/signup.html">Sign Up</a></li>`);
 
     const logoutLink = document.getElementById('mobileLogoutLink');
     if (logoutLink){
@@ -360,7 +360,7 @@ function initSearch(){
     searchSuggest.hidden = false;
     searchSuggest.querySelectorAll('li').forEach(li => {
       li.addEventListener('click', () => {
-        window.location.href = 'category.html?q=' + encodeURIComponent(li.dataset.q);
+        window.location.href = ROOT_PATH + 'shop/category.html?q=' + encodeURIComponent(li.dataset.q);
       });
     });
   }
@@ -375,7 +375,7 @@ function initSearch(){
     e.preventDefault();
     const query = searchInput.value.trim();
     if (!query) return;
-    window.location.href = 'category.html?q=' + encodeURIComponent(query);
+    window.location.href = ROOT_PATH + 'shop/category.html?q=' + encodeURIComponent(query);
   });
 }
 
