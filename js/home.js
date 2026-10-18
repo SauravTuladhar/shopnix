@@ -160,13 +160,15 @@ function handleHomeDeepLink(){
   }
 }
 
-renderSidebarCats();
-renderCatGrid();
-renderFlashSale();
-renderTabs();
-renderJustForYou();
-initLoadMore();
+loadCatalog().then(() => {
+  renderSidebarCats();
+  renderCatGrid();
+  renderFlashSale();
+  renderTabs();
+  renderJustForYou();
+  initLoadMore();
+  handleHomeDeepLink();
+});
 initCarousel();
 initCountdown();
 initNewsletter();
-handleHomeDeepLink();

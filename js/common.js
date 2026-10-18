@@ -388,4 +388,4 @@ function showFieldMsg(el, msg, type){
   el.className = 'form-msg ' + (type || '');
 }
 
-initHeader();
+loadCatalog().then(initHeader);

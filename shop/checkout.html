@@ -12,7 +12,7 @@
 <meta property="og:description" content="Enter your delivery details and complete your order on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/checkout.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-Hf0k6NgmnXgZM2RsU/he9/FbfI4pElxfoRrD3N/JnVw='; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-axPOLIPikltN71ip6O+aLEJf+L2aKdcQeb4XyAwyOWA='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -89,7 +89,9 @@
 <div id="site-footer"></div>
 
 <script src="../js/partials.js"></script>
-<script src="../js/products.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/catalog.js"></script>
 <script src="../js/common.js"></script>
 <script>
 function renderCheckoutSummary(){
@@ -141,7 +143,7 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
 });
 
 onCartChange(initCheckoutPage);
-initCheckoutPage();
+loadCatalog().then(initCheckoutPage);
 </script>
 </body>
 </html>
