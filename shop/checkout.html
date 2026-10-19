@@ -12,7 +12,7 @@
 <meta property="og:description" content="Enter your delivery details and complete your order on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/checkout.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-u0UG4x/x2vx32+iYb4OvBVDos+vjWi+lLTF9l6kIako='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-5U/YEbHxuJ5EaxrtqbqvFrBB/hyZ/rYSu5GR/eYORkg='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -34,6 +34,13 @@
       <h2>Your cart is empty</h2>
       <p class="form-sub">Add a few products before checking out.</p>
       <a href="../index.html" class="btn btn-accent">Start Shopping</a>
+    </div>
+
+    <div id="loginGate" class="form-card" style="display:none;">
+      <h2>Please login to continue</h2>
+      <p class="form-sub">An account is required to place an order so you can track it afterwards.</p>
+      <a href="../account/login.html?redirect=..%2Fshop%2Fcheckout.html" class="btn btn-accent" id="loginGateLink">Login</a>
+      <p class="form-switch">New here? <a href="../account/signup.html?redirect=..%2Fshop%2Fcheckout.html" id="signupGateLink">Create an account</a></p>
     </div>
 
     <div id="checkoutView" class="split-layout" style="display:none;">
@@ -64,6 +71,7 @@
             </select>
           </div>
           <button type="submit" class="btn btn-accent">Place Order</button>
+          <div class="form-alert" id="checkoutAlert"></div>
         </form>
       </div>
 
@@ -109,21 +117,25 @@ function renderCheckoutSummary(){
 
 function initCheckoutPage(){
   const cart = getCart();
+  const user = getUser();
   document.getElementById('emptyCartNotice').style.display = cart.length === 0 ? 'block' : 'none';
-  document.getElementById('checkoutView').style.display = cart.length === 0 ? 'none' : 'grid';
-  if (cart.length === 0) return;
+  document.getElementById('loginGate').style.display = (cart.length > 0 && !user) ? 'block' : 'none';
+  document.getElementById('checkoutView').style.display = (cart.length > 0 && user) ? 'grid' : 'none';
+  if (cart.length === 0 || !user) return;
   renderCheckoutSummary();
 }
 
-document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const nameField = document.getElementById('ckName');
   const phoneField = document.getElementById('ckPhone');
   const addressField = document.getElementById('ckAddress');
+  const alertEl = document.getElementById('checkoutAlert');
 
   const name = document.getElementById('ckNameInput').value.trim();
   const phone = document.getElementById('ckPhoneInput').value.trim();
   const address = document.getElementById('ckAddressInput').value.trim();
+  const paymentMethod = document.getElementById('ckPayment').value;
 
   let valid = true;
   nameField.classList.toggle('invalid', !name); if (!name) valid = false;
@@ -132,17 +144,33 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
   addressField.classList.toggle('invalid', !address); if (!address) valid = false;
   if (!valid) return;
 
-  const orderId = 'SPX-' + Math.floor(10000 + Math.random() * 89999);
+  const submitBtn = document.querySelector('#checkoutForm button[type="submit"]');
+  submitBtn.disabled = true;
+  alertEl.className = 'form-alert';
+  const items = getCart().map(c => ({ id: c.id, qty: c.qty }));
+  const { data: orderCode, error } = await sb.rpc('place_order', {
+    items, p_name: name, p_phone: phone, p_address: address, p_payment_method: paymentMethod,
+  });
+  submitBtn.disabled = false;
+
+  if (error){
+    alertEl.textContent = error.message || 'Could not place your order. Please try again.';
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
   document.getElementById('confirmationText').textContent =
-    `Thanks ${name}! Your order #${orderId} (${money(cartSubtotal())}) will be delivered to "${address}".`;
+    `Thanks ${name}! Your order #${orderCode} (${money(cartSubtotal())}) will be delivered to "${address}".`;
 
   clearCart();
+  document.getElementById('loginGate').style.display = 'none';
   document.getElementById('checkoutView').style.display = 'none';
   document.getElementById('emptyCartNotice').style.display = 'none';
   document.getElementById('confirmationView').style.display = 'block';
 });
 
 onCartChange(initCheckoutPage);
+onAuthChange(initCheckoutPage);
 loadCatalog().then(initCheckoutPage).catch(showCatalogError);
 </script>
 </body>

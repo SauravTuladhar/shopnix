@@ -12,7 +12,7 @@
 <meta property="og:description" content="Login to your Shopnix account to continue shopping.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/account/login.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-VqwgDG8uapIsnNkrfj/GLeyAe3IsZmVs+FTslYJXWLM='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ix+YD+76/srIuCx8kl6x6pMkKCzYTKsr6oSQ0LYqh+U='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -59,7 +59,12 @@
 <script src="../js/catalog.js"></script>
 <script src="../js/common.js"></script>
 <script>
-document.getElementById('loginForm').addEventListener('submit', (e) => {
+const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+if (redirectParam){
+  document.querySelector('.form-switch a[href="signup.html"]').href = 'signup.html?redirect=' + encodeURIComponent(redirectParam);
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const emailField = document.getElementById('emailField');
   const passwordField = document.getElementById('passwordField');
@@ -79,11 +84,20 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
     return;
   }
 
-  const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  setUser({ name, email });
-  alertEl.textContent = `Welcome back, ${name}! Redirecting...`;
+  const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+  submitBtn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  submitBtn.disabled = false;
+  if (error){
+    alertEl.textContent = error.message;
+    alertEl.className = 'form-alert show error';
+    return;
+  }
+
+  const redirect = new URLSearchParams(window.location.search).get('redirect') || 'account.html';
+  alertEl.textContent = 'Welcome back! Redirecting...';
   alertEl.className = 'form-alert show success';
-  setTimeout(() => { window.location.href = 'account.html'; }, 900);
+  setTimeout(() => { window.location.href = redirect; }, 700);
 });
 </script>
 </body>

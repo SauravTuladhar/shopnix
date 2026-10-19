@@ -1,7 +1,6 @@
 /* ===================== SHARED STATE (persisted) ===================== */
 const CART_KEY = 'shopnix_cart';
 const WISHLIST_KEY = 'shopnix_wishlist';
-const USER_KEY = 'shopnix_user';
 
 function readJSON(key, fallback){
   try {
@@ -27,11 +26,38 @@ function setCart(cart){
 function getWishlist(){ return readJSON(WISHLIST_KEY, []); }    // [id, id, ...]
 function setWishlist(list){ writeJSON(WISHLIST_KEY, list); renderWishlistBadge(); }
 
-function getUser(){ return readJSON(USER_KEY, null); }
-function setUser(user){ writeJSON(USER_KEY, user); updateAccountUI(); }
-function logoutUser(){ localStorage.removeItem(USER_KEY); updateAccountUI(); }
-
 function money(n){ return 'Rs. ' + Number(n).toLocaleString('en-IN'); }
+
+/* ===================== AUTH (Supabase-backed) ===================== */
+/* Cart/wishlist above stay localStorage-only and guest-accessible by design
+   (see CLAUDE.md's "Auth is real, cart/wishlist are not" section) -- only
+   identity is real now.
+   authUser is populated asynchronously by onAuthStateChange below, which
+   fires once immediately with whatever session exists on page load and
+   again on every sign-in/out, so getUser() can stay a synchronous cached
+   read (same calling convention every existing caller already expects) at
+   the cost of a brief logged-out flash on first paint, same tradeoff as
+   CATEGORIES/PRODUCTS being empty until loadCatalog() resolves. */
+let authUser = null; // { id, email, name } | null
+
+const authChangeCallbacks = [];
+function onAuthChange(cb){ authChangeCallbacks.push(cb); }
+
+function getUser(){ return authUser; }
+async function logoutUser(){ await sb.auth.signOut(); }
+
+async function refreshAuthUser(session){
+  if (!session || !session.user){
+    authUser = null;
+  } else {
+    const { data } = await sb.from('profiles').select('name').eq('id', session.user.id).single();
+    authUser = { id: session.user.id, email: session.user.email, name: (data && data.name) || session.user.email };
+  }
+  updateAccountUI();
+  authChangeCallbacks.forEach(cb => cb());
+}
+
+sb.auth.onAuthStateChange((_event, session) => { refreshAuthUser(session); });
 
 /* ===================== CART OPERATIONS ===================== */
 function addToCart(id, qty){
@@ -111,9 +137,11 @@ function renderStars(rating){
 function productCardHTML(p){
   const wished = isWished(p.id);
   const discount = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : null;
+  const outOfStock = p.stock !== undefined && p.stock !== null && p.stock <= 0;
   return `
     <article class="product-card" data-id="${p.id}">
       ${discount ? `<div class="discount-tag">-${discount}%</div>` : ''}
+      ${outOfStock ? `<div class="stock-tag">Out of stock</div>` : ''}
       <button class="wish-toggle${wished ? ' active' : ''}" aria-label="Toggle wishlist">${wished ? '&#9829;' : '&#9825;'}</button>
       <a href="category.html?cat=${p.category}" class="product-img-link">
         <img src="${p.img}" alt="${p.name}">
@@ -125,7 +153,7 @@ function productCardHTML(p){
         ${p.oldPrice ? `<span class="old-price">${money(p.oldPrice)}</span>` : ''}
       </div>
       ${p.flash ? `<div class="progress-bar"><div style="width:${p.sold}%"></div></div><small>${p.sold}% sold</small>` : ''}
-      <button class="btn btn-add">Add to Cart</button>
+      <button class="btn btn-add"${outOfStock ? ' disabled' : ''}>${outOfStock ? 'Out of Stock' : 'Add to Cart'}</button>
     </article>
   `;
 }
@@ -159,6 +187,7 @@ document.addEventListener('click', (e) => {
   }
   const addBtn = e.target.closest('.btn-add');
   if (addBtn){
+    if (addBtn.disabled) return;
     const card = addBtn.closest('.product-card');
     const id = card.dataset.id;
     const p = getProductById(id);

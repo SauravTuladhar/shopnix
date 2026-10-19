@@ -25,13 +25,17 @@ create table products (
   rating numeric not null,
   reviews int not null,
   flash boolean not null default false,
-  sold int
+  sold int,
+  stock int not null default 100
 );
 
 -- One row per auth.users row; created automatically by the trigger below.
+-- is_admin is never self-serve -- promote an account manually (see the
+-- "ADMIN ACCESS" note near the bottom) after it has signed up normally.
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  name text not null
+  name text not null,
+  is_admin boolean not null default false
 );
 
 create table cart_items (
@@ -127,6 +131,94 @@ create policy "read own order items" on order_items for select
   using (exists (select 1 from orders o where o.id = order_items.order_id and o.user_id = auth.uid()));
 create policy "insert own order items" on order_items for insert
   with check (exists (select 1 from orders o where o.id = order_items.order_id and o.user_id = auth.uid()));
+
+-- Admin dashboard (admin/): additive policies, gated on profiles.is_admin.
+-- In practice orders/order_items are only ever written by place_order()
+-- below (SECURITY DEFINER, so it bypasses these entirely) -- these let an
+-- admin browse every order and update its status from the dashboard.
+create policy "admin manage products" on products for all
+  using (exists (select 1 from profiles where id = auth.uid() and is_admin))
+  with check (exists (select 1 from profiles where id = auth.uid() and is_admin));
+
+create policy "admin read all orders" on orders for select
+  using (exists (select 1 from profiles where id = auth.uid() and is_admin));
+create policy "admin update orders" on orders for update
+  using (exists (select 1 from profiles where id = auth.uid() and is_admin));
+
+create policy "admin read all order items" on order_items for select
+  using (exists (select 1 from profiles where id = auth.uid() and is_admin));
+
+-- ===================== CHECKOUT: place_order() =====================
+-- Turns a cart into a real order: validates stock, inserts the order + its
+-- items at current price, decrements stock, and returns the new order_code.
+-- SECURITY DEFINER so it can decrement products.stock (regular users have no
+-- UPDATE grant on products); user_id is always auth.uid(), never trusted
+-- from the caller, so this can't be used to place an order as someone else.
+create or replace function place_order(
+  items jsonb, -- [{"id": "product-id", "qty": 2}, ...]
+  p_name text,
+  p_phone text,
+  p_address text,
+  p_payment_method text
+) returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_order_id uuid;
+  v_order_code text;
+  v_total numeric := 0;
+  v_item record;
+  v_price numeric;
+  v_stock int;
+begin
+  if v_user_id is null then
+    raise exception 'Must be logged in to place an order';
+  end if;
+  if jsonb_array_length(items) = 0 then
+    raise exception 'Cart is empty';
+  end if;
+
+  -- Validate stock up front so we fail before writing anything.
+  for v_item in select (e->>'id') as id, (e->>'qty')::int as qty from jsonb_array_elements(items) e
+  loop
+    select price, stock into v_price, v_stock from products where id = v_item.id for update;
+    if v_price is null then
+      raise exception 'Product % no longer exists', v_item.id;
+    end if;
+    if v_stock < v_item.qty then
+      raise exception 'Not enough stock for %: only % left', v_item.id, v_stock;
+    end if;
+    v_total := v_total + v_price * v_item.qty;
+  end loop;
+
+  v_order_code := 'SPX-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
+
+  insert into orders (order_code, user_id, total, name, phone, address, payment_method)
+  values (v_order_code, v_user_id, v_total, p_name, p_phone, p_address, p_payment_method)
+  returning id into v_order_id;
+
+  for v_item in select (e->>'id') as id, (e->>'qty')::int as qty from jsonb_array_elements(items) e
+  loop
+    select price into v_price from products where id = v_item.id;
+    insert into order_items (order_id, product_id, qty, price_at_purchase)
+    values (v_order_id, v_item.id, v_item.qty, v_price);
+    update products set stock = stock - v_item.qty where id = v_item.id;
+  end loop;
+
+  return v_order_code;
+end;
+$$;
+
+grant execute on function place_order(jsonb, text, text, text, text) to authenticated;
+
+-- ===================== ADMIN ACCESS =====================
+-- There's no self-serve admin signup. Sign up a normal account through the
+-- storefront first, find its id (Authentication -> Users in the Supabase
+-- dashboard, or `select id from auth.users where email = '...'`), then run:
+--   update profiles set is_admin = true where id = '<that uuid>';
 
 -- ===================== SEED DATA =====================
 -- Mirrors the CATEGORIES/PRODUCTS arrays previously hardcoded in js/products.js.

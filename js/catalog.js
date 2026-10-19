@@ -33,7 +33,7 @@ function loadCatalog(){
     PRODUCTS = prodRes.data.map(p => ({
       id: p.id, name: p.name, price: p.price, oldPrice: p.old_price,
       category: p.category_slug, img: p.img, rating: p.rating,
-      reviews: p.reviews, flash: p.flash, sold: p.sold,
+      reviews: p.reviews, flash: p.flash, sold: p.sold, stock: p.stock,
     }));
   });
   return _catalogPromise;

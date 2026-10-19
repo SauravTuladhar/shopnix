@@ -1,8 +1,8 @@
 # Shopnix
 
-A Daraz-inspired, teal & coral demo e-commerce marketplace. Plain HTML/CSS/JS, no framework, no build step. Deployed to GitHub Pages at **https://sauravtuladhar.github.io/shopnix/**.
+A teal & coral demo e-commerce marketplace. Plain HTML/CSS/JS, no framework, no build step. Deployed to GitHub Pages at **https://sauravtuladhar.github.io/shopnix/**.
 
-The product catalog (categories/products) is backed by [Supabase](https://supabase.com); cart, wishlist, and "login" are still client-side only, stored in `localStorage`. See `project.docx` for the full project detail document.
+The product catalog (categories/products), auth (real Supabase Auth), and orders (placed via a `place_order` RPC) are backed by [Supabase](https://supabase.com); cart and wishlist remain client-side only, stored in `localStorage`, by design. An `admin/` area lets an admin account manage products (including stock) and orders. See `project.docx` for the full project detail document.
 
 ## Running locally
 
@@ -24,20 +24,30 @@ shop/                        cart, category, checkout, wishlist
 account/                     account, login, orders, signup, track-order
 info/                        about, blog, careers, contact, download-app, help-center,
                              how-to-buy, privacy, returns, seller, terms
+admin/                       login, dashboard — internal admin tool, noindex'd, not in the sitemap
 css/styles.css               Single stylesheet, themed via CSS custom properties
 js/
   partials.js                 Injects header/footer/drawers (innerHTML, not fetch)
   supabase-client.js           Creates the Supabase client (`sb`)
   catalog.js                   Async loadCatalog() — fetches categories/products from Supabase
-  common.js                    Cart/wishlist/user state, product rendering, header interactions
+  common.js                    Cart/wishlist/auth state, product rendering, header interactions
   home.js                      index.html-only logic (carousel, countdown, tabs, pagination)
-supabase/schema.sql           Tables, Row Level Security policies, and seed data
+  admin.js                     Shared admin logic (auth guard, product CRUD, order management)
+  admin-login.js, admin-dashboard.js   Page-specific admin scripts
+supabase/schema.sql           Tables, Row Level Security policies, seed data, and place_order()
+supabase/migrations/          Incremental follow-up migrations for an already-provisioned project
 ```
 
-Every page loads scripts in this exact order at the bottom of `<body>`:
+Every storefront page loads scripts in this exact order at the bottom of `<body>`:
 
 ```
 partials.js → Supabase JS SDK (CDN) → supabase-client.js → catalog.js → common.js → (home.js | page-specific inline <script>)
+```
+
+`admin/` pages are the exception — no storefront chrome, so no `partials.js`/`catalog.js`/`common.js`:
+
+```
+Supabase JS SDK (CDN) → supabase-client.js → admin.js → (admin-login.js | admin-dashboard.js)
 ```
 
 ## Content Security Policy
@@ -54,7 +64,7 @@ b64 = base64.b64encode(hashlib.sha256(content.encode('utf-8')).digest()).decode(
 
 ## Database
 
-`supabase/schema.sql` defines `categories`, `products`, `profiles`, `cart_items`, `wishlist_items`, `orders`, and `order_items`, all with Row Level Security. Only `categories`/`products` are currently read by the frontend — the rest are reserved for a future phase that moves cart/wishlist/auth/orders off `localStorage` and onto Supabase.
+`supabase/schema.sql` defines `categories`, `products`, `profiles`, `cart_items`, `wishlist_items`, `orders`, and `order_items`, all with Row Level Security, plus the `place_order()` RPC checkout uses to create an order and decrement stock atomically. `categories`/`products`/`profiles`/`orders`/`order_items` are live; `cart_items`/`wishlist_items` remain unused by design (cart/wishlist stay in `localStorage`). There's no self-serve admin signup — promote an account with `update profiles set is_admin = true where id = '<uuid>'` after it signs up normally, then it can log into `admin/login.html`.
 
 ## More detail
 

@@ -12,7 +12,7 @@
 <meta property="og:description" content="Track and review your past purchases on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/account/orders.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-DiZtlK46rqTZC2CR33NJ+hRYF60pkxBQogyis7eu79E='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-mpT77OM2pRLZaBsx1RAlViHlW44E7ImGbbWT8CyIyEU='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -47,14 +47,6 @@
 <script src="../js/catalog.js"></script>
 <script src="../js/common.js"></script>
 <script>
-const SAMPLE_ORDERS = [
-  { id:'SPX-10234', date:'2026-10-01', items:'Wireless Earbuds Pro, Smart Fitness Watch', total:6398, status:'Delivered' },
-  { id:'SPX-10198', date:'2026-09-22', items:'Memory Foam Pillow', total:999, status:'Delivered' },
-  { id:'SPX-10165', date:'2026-10-08', items:'Running Shoes Air-X, Backpack Urban 20L', total:5498, status:'Shipped' },
-  { id:'SPX-10151', date:'2026-10-11', items:'Vitamin C Serum', total:799, status:'Processing' },
-  { id:'SPX-10090', date:'2026-08-30', items:'Yoga Mat 6mm', total:1199, status:'Cancelled' },
-];
-
 const STATUS_CLASS = {
   Delivered:'status-delivered',
   Shipped:'status-shipped',
@@ -62,7 +54,7 @@ const STATUS_CLASS = {
   Cancelled:'status-cancelled',
 };
 
-function renderOrders(){
+async function renderOrders(){
   const wrap = document.getElementById('ordersList');
   const loggedOutView = document.getElementById('loggedOutView');
   const user = getUser();
@@ -71,21 +63,41 @@ function renderOrders(){
   wrap.style.display = user ? 'block' : 'none';
   if (!user) return;
 
-  wrap.innerHTML = SAMPLE_ORDERS.map(o => `
-    <div class="order-card">
-      <div class="order-info">
-        <h4>Order #${o.id}</h4>
-        <span>${o.date} &middot; ${o.items}</span>
-        <span>Total: ${money(o.total)}</span>
+  wrap.innerHTML = '<p class="empty-state">Loading your orders...</p>';
+  const { data, error } = await sb.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
+  if (error){
+    wrap.innerHTML = '<p class="empty-state">Could not load your orders. Please try again later.</p>';
+    return;
+  }
+  if (!data || data.length === 0){
+    wrap.innerHTML = '<p class="empty-state">You have no orders yet.</p>';
+    return;
+  }
+
+  wrap.innerHTML = data.map(o => {
+    const itemsLabel = o.order_items.map(it => {
+      const p = getProductById(it.product_id);
+      return `${p ? p.name : it.product_id} &times; ${it.qty}`;
+    }).join(', ');
+    const date = new Date(o.created_at).toLocaleDateString();
+    return `
+      <div class="order-card">
+        <div class="order-info">
+          <h4>Order #${o.order_code}</h4>
+          <span>${date} &middot; ${itemsLabel}</span>
+          <span>Total: ${money(o.total)}</span>
+        </div>
+        <div>
+          <span class="status-badge ${STATUS_CLASS[o.status] || ''}">${o.status}</span>
+          <a href="track-order.html?order=${o.order_code}" class="see-all" style="margin-left:12px;">Track &rsaquo;</a>
+        </div>
       </div>
-      <div>
-        <span class="status-badge ${STATUS_CLASS[o.status]}">${o.status}</span>
-        <a href="track-order.html?order=${o.id}" class="see-all" style="margin-left:12px;">Track &rsaquo;</a>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
-renderOrders();
+
+onAuthChange(renderOrders);
+loadCatalog().then(renderOrders).catch(showCatalogError);
 </script>
 </body>
 </html>
