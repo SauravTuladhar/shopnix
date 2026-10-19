@@ -141,7 +141,7 @@ const FOOTER_HTML = `
   </div>
 </div>
 <div class="footer-bottom">
-  <p>&copy; 2026 Shopnix. All rights reserved. (Educational clone — not affiliated with Daraz.)</p>
+  <p>&copy; 2026 Shopnix. All rights reserved. (Educational demo project.)</p>
 </div>
 `;
 
