@@ -123,13 +123,13 @@ const FOOTER_HTML = `
   <div class="footer-col">
     <h4>Payment</h4>
     <div class="payment-icons">
-      <span>eSewa</span><span>Khalti</span><span>VISA</span><span>COD</span>
+      <span class="payment-badge">eSewa</span><span class="payment-badge">Khalti</span><span class="payment-badge">VISA</span><span class="payment-badge">COD</span>
     </div>
     <h4>Follow Us</h4>
     <div class="social-icons">
-      <span class="social-icon" title="Facebook">f</span>
-      <span class="social-icon" title="Instagram">ig</span>
-      <span class="social-icon" title="X">x</span>
+      <span class="social-icon" title="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5-.93 9-4.96 9-9.95z"/></svg></span>
+      <span class="social-icon" title="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.15 0 3.5.01 4.73.07 1.02.05 1.57.21 1.94.35.49.19.83.42 1.2.78.36.37.59.71.78 1.2.14.37.3.92.35 1.94.06 1.23.07 1.58.07 4.73s-.01 3.5-.07 4.73c-.05 1.02-.21 1.57-.35 1.94-.19.49-.42.83-.78 1.2-.37.36-.71.59-1.2.78-.37.14-.92.3-1.94.35-1.23.06-1.58.07-4.73.07s-3.5-.01-4.73-.07c-1.02-.05-1.57-.21-1.94-.35a3.72 3.72 0 01-1.2-.78 3.72 3.72 0 01-.78-1.2c-.14-.37-.3-.92-.35-1.94-.06-1.23-.07-1.58-.07-4.73s.01-3.5.07-4.73c.05-1.02.21-1.57.35-1.94.19-.49.42-.83.78-1.2.37-.36.71-.59 1.2-.78.37-.14.92-.3 1.94-.35 1.23-.06 1.58-.07 4.73-.07zm0 4.14a4.86 4.86 0 110 9.72 4.86 4.86 0 010-9.72zm0 1.62a3.24 3.24 0 100 6.48 3.24 3.24 0 000-6.48zm6.18-3.24a1.14 1.14 0 110 2.28 1.14 1.14 0 010-2.28z"/></svg></span>
+      <span class="social-icon" title="X"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 3H21l-6.7 7.66L22.3 21H16.6l-5.03-6.4L5.84 21H3.72l7.17-8.2L2.9 3h5.84l4.6 5.85L18.9 3z"/></svg></span>
     </div>
   </div>
   <div class="footer-col">
@@ -180,7 +180,7 @@ function renderPartials(){
   const headerEl = document.getElementById('site-header');
   const footerEl = document.getElementById('site-footer');
   if (headerEl) headerEl.innerHTML = HEADER_HTML;
-  if (footerEl) footerEl.innerHTML = FOOTER_HTML;
+  if (footerEl){ footerEl.classList.add('footer'); footerEl.innerHTML = FOOTER_HTML; }
   document.body.insertAdjacentHTML('beforeend', EXTRAS_HTML);
 }
 

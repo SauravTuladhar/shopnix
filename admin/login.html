@@ -9,34 +9,31 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body>
+<body class="admin-auth-body">
 
-<header class="admin-topbar">
-  <div class="container">
-    <span class="logo">Shop<span>nix</span> Admin</span>
-  </div>
-</header>
-
-<main class="page-content">
-  <div class="container" style="max-width:460px;">
-    <div class="form-card">
-      <h2>Admin Login</h2>
-      <p class="form-sub">Sign in with an account that has admin access.</p>
-      <form id="adminLoginForm" novalidate>
-        <div class="field" id="emailField">
-          <label for="adminEmail">Email Address</label>
-          <input type="email" id="adminEmail" placeholder="admin@example.com">
-          <div class="field-error">Please enter a valid email address.</div>
-        </div>
-        <div class="field" id="passwordField">
-          <label for="adminPassword">Password</label>
-          <input type="password" id="adminPassword" placeholder="Enter your password">
-          <div class="field-error">Please enter your password.</div>
-        </div>
-        <button type="submit" class="btn btn-accent">Login</button>
-        <div class="form-alert" id="adminLoginAlert"></div>
-      </form>
+<main class="admin-auth-wrap">
+  <div class="admin-auth-card">
+    <div class="admin-auth-brand">
+      <span class="logo">Shop<span>nix</span></span>
+      <span class="admin-brand-tag">Admin</span>
     </div>
+    <h2>Welcome back</h2>
+    <p class="form-sub">Sign in with an account that has admin access.</p>
+    <form id="adminLoginForm" novalidate>
+      <div class="field" id="emailField">
+        <label for="adminEmail">Email Address</label>
+        <input type="email" id="adminEmail" placeholder="admin@example.com">
+        <div class="field-error">Please enter a valid email address.</div>
+      </div>
+      <div class="field" id="passwordField">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" placeholder="Enter your password">
+        <div class="field-error">Please enter your password.</div>
+      </div>
+      <button type="submit" class="btn btn-accent">Login</button>
+      <div class="form-alert" id="adminLoginAlert"></div>
+    </form>
+    <p class="admin-auth-foot">Restricted area &mdash; admin accounts only.</p>
   </div>
 </main>
 

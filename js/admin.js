@@ -51,15 +51,39 @@ function categoryOptionsHTML(selected){
   ).join('');
 }
 
+function priceCellHTML(p){
+  if (!p.old_price){
+    return `<span class="admin-price-current">${money(p.price)}</span>`;
+  }
+  const pct = Math.round((1 - p.price / p.old_price) * 100);
+  const delta = pct > 0
+    ? `<span class="admin-price-delta down">&darr; ${pct}% off</span>`
+    : pct < 0
+      ? `<span class="admin-price-delta up">&uarr; ${-pct}% up</span>`
+      : '';
+  return `
+    <div class="admin-price-cell">
+      <span class="admin-price-current">${money(p.price)}</span>
+      <span class="old-price">was ${money(p.old_price)}</span>
+      ${delta}
+    </div>
+  `;
+}
+
+function stockClass(stock){
+  if (stock <= 0) return 'admin-stock-zero';
+  if (stock <= 5) return 'admin-stock-low';
+  return '';
+}
+
 function productRowHTML(p){
-  const outOfStock = p.stock <= 0;
   return `
     <tr data-id="${p.id}">
       <td>${p.name}</td>
       <td>${categoryLabelFor(p.category_slug)}</td>
-      <td>${money(p.price)}${p.old_price ? ` <span class="old-price">${money(p.old_price)}</span>` : ''}</td>
-      <td class="${outOfStock ? 'admin-stock-zero' : ''}">${p.stock}</td>
-      <td>${p.flash ? 'Yes' : 'No'}</td>
+      <td>${priceCellHTML(p)}</td>
+      <td class="${stockClass(p.stock)}">${p.stock}</td>
+      <td>${p.flash ? '<span class="admin-flash-badge">&#9889; Flash</span>' : '<span class="text-light">&mdash;</span>'}</td>
       <td class="admin-actions">
         <button type="button" class="btn btn-outline admin-edit-product">Edit</button>
         <button type="button" class="btn btn-accent admin-delete-product">Delete</button>
@@ -82,6 +106,16 @@ async function loadProducts(){
   PRODUCT_ROWS = data;
   document.getElementById('productsTableBody').innerHTML = PRODUCT_ROWS.map(productRowHTML).join('')
     || '<tr><td colspan="6" class="empty-state">No products yet.</td></tr>';
+  const outOfStock = PRODUCT_ROWS.filter(p => p.stock <= 0).length;
+  const summary = document.getElementById('productsSummary');
+  if (summary) summary.textContent = `${PRODUCT_ROWS.length} product${PRODUCT_ROWS.length === 1 ? '' : 's'}` +
+    (outOfStock ? ` · ${outOfStock} out of stock` : '');
+}
+
+function updateImgPreview(url){
+  const preview = document.getElementById('productImgPreview');
+  if (!preview) return;
+  if (url){ preview.src = url; } else { preview.removeAttribute('src'); preview.style.display = 'none'; }
 }
 
 function resetProductForm(){
@@ -91,6 +125,7 @@ function resetProductForm(){
   document.getElementById('productFormTitle').textContent = 'Add Product';
   document.getElementById('productIdInput').placeholder = 'generated-from-name';
   document.getElementById('productCancelEdit').style.display = 'none';
+  updateImgPreview('');
 }
 
 function fillProductForm(p){
@@ -103,6 +138,7 @@ function fillProductForm(p){
   document.getElementById('productPriceInput').value = p.price;
   document.getElementById('productOldPriceInput').value = p.old_price || '';
   document.getElementById('productImgInput').value = p.img;
+  updateImgPreview(p.img);
   document.getElementById('productStockInput').value = p.stock;
   document.getElementById('productRatingInput').value = p.rating;
   document.getElementById('productReviewsInput').value = p.reviews;
@@ -119,6 +155,12 @@ function showAdminAlert(id, msg, ok){
 
 function initProductsSection(){
   document.getElementById('productCategoryInput').innerHTML = categoryOptionsHTML();
+
+  const imgInput = document.getElementById('productImgInput');
+  const imgPreview = document.getElementById('productImgPreview');
+  imgInput.addEventListener('input', () => updateImgPreview(imgInput.value.trim()));
+  imgPreview.addEventListener('load', () => { imgPreview.style.display = 'block'; });
+  imgPreview.addEventListener('error', () => { imgPreview.style.display = 'none'; });
 
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -208,6 +250,10 @@ async function loadOrders(){
   if (error){ showAdminAlert('ordersAlert', 'Could not load orders: ' + error.message); return; }
   document.getElementById('ordersTableBody').innerHTML = data.map(orderRowHTML).join('')
     || '<tr><td colspan="6" class="empty-state">No orders yet.</td></tr>';
+  const processing = data.filter(o => o.status === 'Processing').length;
+  const summary = document.getElementById('ordersSummary');
+  if (summary) summary.textContent = `${data.length} order${data.length === 1 ? '' : 's'}` +
+    (processing ? ` · ${processing} processing` : '');
 }
 
 function initOrdersSection(){
@@ -232,6 +278,10 @@ function initTabs(){
       document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById(tab.dataset.panel).classList.add('active');
+      const title = document.getElementById('adminPageTitle');
+      const sub = document.getElementById('adminPageSub');
+      if (title && tab.dataset.title) title.textContent = tab.dataset.title;
+      if (sub && tab.dataset.sub) sub.textContent = tab.dataset.sub;
     });
   });
 }

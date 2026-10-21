@@ -9,28 +9,41 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body>
+<body class="admin-body">
 
-<header class="admin-topbar">
-  <div class="container">
-    <span class="logo">Shop<span>nix</span> Admin</span>
-    <div class="admin-topbar-right">
-      <span id="adminGreeting">Hi there</span>
-      <button type="button" class="btn btn-outline" id="adminLogoutBtn" style="background:#fff;">Logout</button>
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <span class="logo">Shop<span>nix</span></span>
+      <span class="admin-brand-tag">Admin</span>
     </div>
-  </div>
-</header>
 
-<main class="page-content">
-  <div class="container">
+    <nav class="admin-nav">
+      <button type="button" class="admin-tab active" data-panel="productsPanel" data-title="Products" data-sub="Add, edit, and manage your product catalog.">
+        <span class="admin-nav-icon" aria-hidden="true">&#128230;</span> Products
+      </button>
+      <button type="button" class="admin-tab" data-panel="ordersPanel" data-title="Orders" data-sub="Track and update the status of incoming orders.">
+        <span class="admin-nav-icon" aria-hidden="true">&#129534;</span> Orders
+      </button>
+    </nav>
 
-    <div class="admin-tabs">
-      <button type="button" class="admin-tab active" data-panel="productsPanel">Products</button>
-      <button type="button" class="admin-tab" data-panel="ordersPanel">Orders</button>
+    <div class="admin-sidebar-footer">
+      <div class="admin-user">
+        <span class="admin-user-avatar" aria-hidden="true">&#128100;</span>
+        <span id="adminGreeting">Hi there</span>
+      </div>
+      <button type="button" class="btn btn-outline admin-logout-btn" id="adminLogoutBtn">Logout</button>
     </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-pagehead">
+      <h1 id="adminPageTitle">Products</h1>
+      <p id="adminPageSub">Add, edit, and manage your product catalog.</p>
+    </header>
 
     <section id="productsPanel" class="admin-panel active">
-      <div class="form-card" style="max-width:none;">
+      <div class="form-card admin-form-card">
         <h2 id="productFormTitle">Add Product</h2>
         <form id="productForm" novalidate>
           <div class="admin-form-grid">
@@ -51,8 +64,9 @@
               <input type="number" id="productPriceInput" min="0" step="0.01" required>
             </div>
             <div class="field">
-              <label for="productOldPriceInput">Old Price (optional)</label>
+              <label for="productOldPriceInput">Previous Price (optional)</label>
               <input type="number" id="productOldPriceInput" min="0" step="0.01">
+              <div class="field-hint">Set this to track a price change — it shows as a struck-through "was" price with a discount/increase badge below, both here and on the storefront.</div>
             </div>
             <div class="field">
               <label for="productStockInput">Stock Quantity</label>
@@ -61,6 +75,9 @@
             <div class="field">
               <label for="productImgInput">Image URL</label>
               <input type="text" id="productImgInput" required>
+              <div class="admin-img-preview-wrap">
+                <img id="productImgPreview" class="admin-img-preview" alt="Image preview">
+              </div>
             </div>
             <div class="field">
               <label for="productRatingInput">Rating (0-5)</label>
@@ -75,12 +92,18 @@
             <input type="checkbox" id="productFlashInput">
             <label for="productFlashInput">Flash sale item</label>
           </div>
-          <button type="submit" class="btn btn-accent" style="width:auto;">Save Product</button>
-          <button type="button" class="btn btn-outline" id="productCancelEdit" style="width:auto;display:none;">Cancel Edit</button>
+          <div class="admin-form-actions">
+            <button type="submit" class="btn btn-accent">Save Product</button>
+            <button type="button" class="btn btn-outline" id="productCancelEdit" style="display:none;">Cancel Edit</button>
+          </div>
           <div class="form-alert" id="productsAlert"></div>
         </form>
       </div>
 
+      <div class="admin-table-head">
+        <h3>All Products</h3>
+        <span class="admin-table-summary" id="productsSummary"></span>
+      </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
@@ -92,7 +115,11 @@
     </section>
 
     <section id="ordersPanel" class="admin-panel">
-      <div class="form-alert" id="ordersAlert" style="margin-bottom:12px;"></div>
+      <div class="admin-table-head">
+        <h3>All Orders</h3>
+        <span class="admin-table-summary" id="ordersSummary"></span>
+      </div>
+      <div class="form-alert" id="ordersAlert"></div>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
@@ -103,8 +130,8 @@
       </div>
     </section>
 
-  </div>
-</main>
+  </main>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="../js/supabase-client.js"></script>

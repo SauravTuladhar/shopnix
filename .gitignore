@@ -21,3 +21,9 @@ __pycache__/
 ~$*.docx
 ~$*.xlsx
 ~$*.pptx
+
+# Playwright QA framework output (qa/playwright/)
+qa/playwright/test-results/
+qa/playwright/playwright-report/
+qa/playwright/blob-report/
+qa

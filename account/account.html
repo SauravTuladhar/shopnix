@@ -29,17 +29,17 @@
 
 <main class="page-content">
   <div class="container">
-    <div id="loggedOutView" class="form-card" style="display:none;">
+    <div id="loggedOutView" class="form-card account-form-card" style="display:none;">
       <h2>You're not logged in</h2>
       <p class="form-sub">Login or create an account to see your profile, orders and wishlist.</p>
       <a href="login.html" class="btn btn-accent">Login</a>
       <p class="form-switch">New here? <a href="signup.html">Create an account</a></p>
     </div>
 
-    <div id="loggedInView" class="form-card" style="display:none; max-width:560px;">
+    <div id="loggedInView" class="form-card account-form-card" style="display:none; max-width:560px;">
       <h2 id="greetName">Hi there</h2>
       <p class="form-sub" id="greetEmail"></p>
-      <div class="cat-grid" style="grid-template-columns:repeat(2,1fr);">
+      <div class="cat-grid account-quicklinks" style="grid-template-columns:repeat(2,1fr);">
         <a class="cat-item" href="orders.html"><span class="cat-icon">📦</span>My Orders</a>
         <a class="cat-item" href="../shop/wishlist.html"><span class="cat-icon">❤️</span>My Wishlist</a>
         <a class="cat-item" href="../shop/cart.html"><span class="cat-icon">🛒</span>My Cart</a>
