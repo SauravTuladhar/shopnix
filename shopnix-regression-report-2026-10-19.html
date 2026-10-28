@@ -1,0 +1,268 @@
+<title>Shopnix Production Regression</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* layout: header band + stat tiles + grouped results tables + findings/cleanup cards, single column, teal/coral tokens lifted from Shopnix's own site */
+:root{
+  --bg:#f3f6f5;
+  --surface:#ffffff;
+  --surface-2:#eef2f1;
+  --border:#dfe6e3;
+  --ink:#16231f;
+  --ink-muted:#5b6b66;
+  --primary:#0f6e5f;
+  --primary-dark:#0b4f44;
+  --accent:#e14a39;
+  --gold:#ffb400;
+  --good:#1a8f5c;
+  --good-bg:#e4f5ec;
+  --info:#b4780a;
+  --info-bg:#fdf1dc;
+  --mono: "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1715;
+    --surface:#16201d;
+    --surface-2:#1b2622;
+    --border:#263330;
+    --ink:#e9f2ee;
+    --ink-muted:#92a39d;
+    --primary:#2bbf9f;
+    --primary-dark:#1f8f77;
+    --accent:#ff8370;
+    --gold:#ffc84d;
+    --good:#4fcc8f;
+    --good-bg:#153426;
+    --info:#e3a93f;
+    --info-bg:#3a2d12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1715;
+  --surface:#16201d;
+  --surface-2:#1b2622;
+  --border:#263330;
+  --ink:#e9f2ee;
+  --ink-muted:#92a39d;
+  --primary:#2bbf9f;
+  --primary-dark:#1f8f77;
+  --accent:#ff8370;
+  --gold:#ffc84d;
+  --good:#4fcc8f;
+  --good-bg:#153426;
+  --info:#e3a93f;
+  --info-bg:#3a2d12;
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.45;
+  margin:0;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 60px;}
+h1,h2,h3{text-wrap:balance;margin:0;}
+code, .mono{font-family:var(--mono);}
+a{color:var(--primary-dark);}
+
+.masthead{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;
+  padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:22px;
+}
+.masthead .brand{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-dark);}
+.masthead h1{font-size:25px;font-weight:800;margin-top:4px;}
+.masthead .meta{font-size:12.5px;color:var(--ink-muted);text-align:right;}
+.masthead .meta div + div{margin-top:3px;}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:26px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.stat .n{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;}
+.stat .l{font-size:12px;color:var(--ink-muted);margin-top:3px;}
+.stat.good .n{color:var(--good);}
+.stat.info .n{color:var(--info);}
+
+section{margin-bottom:28px;}
+section > h2{font-size:15px;font-weight:800;letter-spacing:.01em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+section > h2 .count{font-size:11.5px;font-weight:700;color:var(--ink-muted);background:var(--surface-2);border-radius:999px;padding:2px 9px;}
+section > p.lede{font-size:13.5px;color:var(--ink-muted);margin:-4px 0 12px;max-width:62ch;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+th{background:var(--surface-2);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-muted);font-weight:700;}
+tr:last-child td{border-bottom:none;}
+td.detail{color:var(--ink-muted);font-size:12px;}
+td.detail code{background:var(--surface-2);padding:1px 5px;border-radius:4px;}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;}
+.pill.pass{background:var(--good-bg);color:var(--good);}
+.pill.pass::before{background:var(--good);}
+.pill.info{background:var(--info-bg);color:var(--info);}
+.pill.info::before{background:var(--info);}
+
+.finding{border-left:3px solid var(--info);background:var(--info-bg);border-radius:0 10px 10px 0;padding:14px 18px;}
+.finding h3{font-size:14px;font-weight:800;margin-bottom:6px;}
+.finding p{font-size:13.5px;margin:6px 0;}
+.finding ol{margin:8px 0 0;padding-left:20px;font-size:13.5px;}
+.finding li{margin-bottom:4px;}
+
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px;padding:16px 18px;margin:0;}
+.kv dt{color:var(--ink-muted);}
+.kv dd{margin:0;}
+.kv a{word-break:break-all;}
+
+pre.sql{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;font-size:12.5px;overflow-x:auto;margin:10px 0 0;
+}
+
+footer{font-size:12px;color:var(--ink-muted);border-top:1px solid var(--border);padding-top:16px;margin-top:8px;}
+
+@media (max-width:520px){
+  .masthead{flex-direction:column;align-items:flex-start;}
+  .masthead .meta{text-align:left;}
+  .kv{grid-template-columns:1fr;}
+}
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <div class="brand">Shopnix &middot; Production</div>
+      <h1>Regression Report</h1>
+    </div>
+    <div class="meta">
+      <div>2026-10-19, 06:48 UTC</div>
+      <div><a href="https://sauravtuladhar.github.io/shopnix/" target="_blank" rel="noopener">sauravtuladhar.github.io/shopnix</a></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat good"><div class="n">32</div><div class="l">checks passed</div></div>
+    <div class="stat good"><div class="n">0</div><div class="l">code defects found</div></div>
+    <div class="stat info"><div class="n">5</div><div class="l">blocked by 1 config setting</div></div>
+    <div class="stat"><div class="n">24</div><div class="l">pages swept for console/CSP errors</div></div>
+  </div>
+
+  <section>
+    <h2>Deployment</h2>
+    <div class="card">
+      <dl class="kv">
+        <dt>Pushed to</dt><dd><code class="mono">main</code> &rarr; GitHub Pages (classic, branch-based)</dd>
+        <dt>Commits</dt><dd>
+          <code class="mono">152e748</code> Add admin dashboard with real Supabase auth and order placement<br>
+          <code class="mono">78a498c</code> Remove remaining Daraz branding references
+        </dd>
+        <dt>Live URL</dt><dd><a href="https://sauravtuladhar.github.io/shopnix/" target="_blank" rel="noopener">https://sauravtuladhar.github.io/shopnix/</a></dd>
+        <dt>Verified live</dt><dd>confirmed index.html served the new build before testing began</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <h2>Site-wide sweep <span class="count">24 pages</span></h2>
+    <p class="lede">Every public page plus both admin pages, loaded headless and checked for console errors, CSP violations, and failed navigations.</p>
+    <div class="card">
+      <table>
+        <tr><th>Page</th><th>Result</th></tr>
+        <tr><td>index.html, shop/*, account/*, info/* (21 pages), admin/login.html, admin/dashboard.html, 404.html</td><td><span class="pill pass">pass</span> no console errors on any page</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Branding &amp; SEO cleanup</h2>
+    <div class="card">
+      <table>
+        <tr><th>Check</th><th>Result</th><th class="detail">Detail</th></tr>
+        <tr><td>No "Daraz" mentions on the live site</td><td><span class="pill pass">pass</span></td><td class="detail">Checked rendered HTML of index.html and about.html</td></tr>
+        <tr><td><code>robots.txt</code> blocks the admin area</td><td><span class="pill pass">pass</span></td><td class="detail"><code>Disallow: /admin/</code> present</td></tr>
+        <tr><td><code>sitemap.xml</code> excludes admin pages</td><td><span class="pill pass">pass</span></td><td class="detail">No <code>/admin/</code> URLs listed</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Catalog, cart &amp; wishlist</h2>
+    <div class="card">
+      <table>
+        <tr><th>Check</th><th>Result</th><th class="detail">Detail</th></tr>
+        <tr><td>Home page renders products from Supabase</td><td><span class="pill pass">pass</span></td><td class="detail">18 product cards loaded</td></tr>
+        <tr><td>Search autosuggest</td><td><span class="pill pass">pass</span></td><td class="detail">Query "earbuds" returned a match</td></tr>
+        <tr><td>Add to Cart updates the header badge</td><td><span class="pill pass">pass</span></td><td class="detail">Badge went 0 &rarr; 1</td></tr>
+        <tr><td>Wishlist toggle updates the header badge</td><td><span class="pill pass">pass</span></td><td class="detail">Badge went 0 &rarr; 1</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Checkout &amp; admin access control</h2>
+    <p class="lede">The two behaviors this release depends on most: checkout refusing to proceed without a real login, and the admin area refusing anyone without <code>is_admin</code>.</p>
+    <div class="card">
+      <table>
+        <tr><th>Check</th><th>Result</th><th class="detail">Detail</th></tr>
+        <tr><td>Checkout shows a login gate (logged out, items in cart)</td><td><span class="pill pass">pass</span></td><td class="detail">Checkout form hidden; login prompt shown</td></tr>
+        <tr><td>Visiting admin/dashboard.html with no session</td><td><span class="pill pass">pass</span></td><td class="detail">Redirected to admin/login.html</td></tr>
+        <tr><td>Admin login rejects a wrong password</td><td><span class="pill pass">pass</span></td><td class="detail">"Invalid login credentials"</td></tr>
+        <tr><td>Admin login rejects a real but non-admin account</td><td><span class="pill info">blocked</span></td><td class="detail">Needs a confirmed test login &mdash; see finding below</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>End-to-end: signup &rarr; order &rarr; My Orders</h2>
+    <div class="card">
+      <table>
+        <tr><th>Check</th><th>Result</th><th class="detail">Detail</th></tr>
+        <tr><td>Signup creates a real Supabase Auth user</td><td><span class="pill pass">pass</span></td><td class="detail">Account created; app correctly showed "check your email to confirm" instead of crashing or silently failing</td></tr>
+        <tr><td>Login with the new account</td><td><span class="pill info">blocked</span></td><td class="detail">Account is unconfirmed &mdash; see finding below</td></tr>
+        <tr><td>place_order() RPC creates a real order</td><td><span class="pill info">blocked</span></td><td class="detail">Requires a logged-in session</td></tr>
+        <tr><td>Cart clears after a successful order</td><td><span class="pill info">blocked</span></td><td class="detail">Requires a logged-in session</td></tr>
+        <tr><td>My Orders shows the new order</td><td><span class="pill info">blocked</span></td><td class="detail">Requires a logged-in session</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Finding: "Confirm email" is on in Supabase Auth</h2>
+    <div class="finding">
+      <h3>Not a code defect &mdash; a project setting blocked the rest of the live run</h3>
+      <p>Signing up <code>shopnix.qa.1792392398159@gmail.com</code> worked correctly: a real <code>auth.users</code> row was created and the app showed the right message ("check your email to confirm it, then log in"). That's the app behaving correctly for this setting &mdash; but it means the test account can't log in until it clicks a confirmation link, which blocks five downstream checks (login, placing a real order, the admin-denial check, My Orders, cart-clear).</p>
+      <p>This was flagged as a manual step in the implementation plan, since it can only be changed in the Supabase dashboard, not from client code. Pick one:</p>
+      <ol>
+        <li><strong>Turn it off</strong> (Supabase dashboard &rarr; Authentication &rarr; Providers &rarr; Email &rarr; "Confirm email"). Matches a demo with no email templates wired up. I can re-run the blocked checks immediately after.</li>
+        <li><strong>Leave it on</strong> and manually confirm the one test account so I can finish this run: <code>update auth.users set email_confirmed_at = now() where email = 'shopnix.qa.1792392398159@gmail.com';</code></li>
+        <li><strong>Leave it on, skip re-testing</strong> &mdash; accept that new signups require email confirmation as intended production behavior.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>Test data created on production</h2>
+    <p class="lede">One real row, created during this run, that isn't cleaned up yet.</p>
+    <div class="card">
+      <table>
+        <tr><th>What</th><th>Value</th></tr>
+        <tr><td>Auth user (unconfirmed)</td><td class="detail"><code>shopnix.qa.1792392398159@gmail.com</code></td></tr>
+      </table>
+    </div>
+    <pre class="sql">-- Run in the Supabase SQL editor to remove it (profiles row cascades automatically)
+delete from auth.users where email = 'shopnix.qa.1792392398159@gmail.com';</pre>
+    <p class="lede" style="margin-top:10px;">No order, order item, or product row was created &mdash; the run stopped before checkout could execute. Admin CRUD on products/orders was not exercised: that needs either an existing admin account's credentials, or <code>update profiles set is_admin = true where id = (select id from auth.users where email = '...')</code> run against the test account above.</p>
+  </section>
+
+  <footer>
+    Generated from a headless Playwright run against the live site (not the local dev server). Full console/network sweep covered 24 pages; behavioral checks covered catalog, cart, wishlist, search, checkout's login gate, and the admin access guard. Says what it checked and what it couldn't &mdash; nothing here was simulated.
+  </footer>
+
+</div>

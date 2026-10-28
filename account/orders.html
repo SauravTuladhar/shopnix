@@ -12,7 +12,7 @@
 <meta property="og:description" content="Track and review your past purchases on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/account/orders.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-mpT77OM2pRLZaBsx1RAlViHlW44E7ImGbbWT8CyIyEU='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-MlngMHMujD8PNW/TdUiestaQXw1HZEN1wfQW60pf/pI='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -53,6 +53,11 @@ const STATUS_CLASS = {
   Processing:'status-processing',
   Cancelled:'status-cancelled',
 };
+const PAYMENT_LABELS = {
+  cod:'Cash on Delivery',
+  esewa:'eSewa',
+  khalti:'Khalti',
+};
 
 async function renderOrders(){
   const wrap = document.getElementById('ordersList');
@@ -86,6 +91,7 @@ async function renderOrders(){
           <h4>Order #${o.order_code}</h4>
           <span>${date} &middot; ${itemsLabel}</span>
           <span>Total: ${money(o.total)}</span>
+          <span>Payment: ${PAYMENT_LABELS[o.payment_method] || o.payment_method}</span>
         </div>
         <div>
           <span class="status-badge ${STATUS_CLASS[o.status] || ''}">${o.status}</span>

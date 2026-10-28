@@ -208,6 +208,9 @@ function showProductDetail(p){
   document.getElementById('pdAdminRating').textContent = `${p.rating} ★ (${p.reviews} reviews)`;
   document.getElementById('pdAdminFlash').textContent = p.flash ? 'Flash sale item' : 'Not a flash sale item';
   document.getElementById('pdAdminDescription').textContent = p.description || 'No description set.';
+  document.getElementById('pdAdminGalleryFileInput').value = '';
+  document.getElementById('pdAdminGalleryStatus').textContent = '';
+  renderProductGallery(p.id);
   document.getElementById('productListView').style.display = 'none';
   document.getElementById('productDetailView').style.display = 'block';
 }
@@ -216,6 +219,27 @@ function hideProductDetail(){
   viewingProductId = null;
   document.getElementById('productDetailView').style.display = 'none';
   document.getElementById('productListView').style.display = 'block';
+}
+
+async function loadProductGallery(productId){
+  const { data, error } = await sb.from('product_images').select('*').eq('product_id', productId).order('created_at');
+  if (error){ showAdminAlert('productsAlert', 'Could not load gallery images: ' + error.message); return []; }
+  return data;
+}
+
+function galleryThumbHTML(row){
+  return `
+    <div class="admin-gallery-thumb" data-id="${row.id}">
+      <img src="${row.url}" alt="">
+      <button type="button" class="admin-gallery-remove" title="Remove image">&times;</button>
+    </div>
+  `;
+}
+
+async function renderProductGallery(productId){
+  const rows = await loadProductGallery(productId);
+  document.getElementById('pdAdminGalleryGrid').innerHTML =
+    rows.map(galleryThumbHTML).join('') || '<p class="empty-state">No additional images yet.</p>';
 }
 
 async function deleteProduct(p){
@@ -242,6 +266,63 @@ function initProductsSection(){
     if (!file) return;
     await uploadProductImage(file);
     e.target.value = '';
+  });
+
+  document.getElementById('pdAdminGalleryFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('pdAdminGalleryStatus');
+    const fileInput = e.target;
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)){
+      showAdminAlert('productsAlert', 'Please choose a JPEG, PNG, WebP, or GIF image.');
+      fileInput.value = '';
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES){
+      showAdminAlert('productsAlert', 'Image must be 5MB or smaller.');
+      fileInput.value = '';
+      return;
+    }
+
+    const ext = (file.name.split('.').pop() || file.type.split('/').pop() || 'jpg').toLowerCase();
+    const path = `${viewingProductId}-gallery-${Date.now()}.${ext}`;
+
+    statusEl.textContent = 'Uploading…';
+    fileInput.disabled = true;
+    const { error: uploadError } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false });
+    fileInput.disabled = false;
+
+    if (uploadError){
+      statusEl.textContent = '';
+      showAdminAlert('productsAlert', 'Could not upload image: ' + uploadError.message);
+      fileInput.value = '';
+      return;
+    }
+
+    const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+    const { error: insertError } = await sb.from('product_images').insert({ product_id: viewingProductId, url: urlData.publicUrl });
+    fileInput.value = '';
+
+    if (insertError){
+      statusEl.textContent = '';
+      showAdminAlert('productsAlert', 'Image uploaded but could not be saved: ' + insertError.message);
+      return;
+    }
+
+    statusEl.textContent = 'Uploaded.';
+    showAdminAlert('productsAlert', 'Image added to gallery.', true);
+    await renderProductGallery(viewingProductId);
+  });
+
+  document.getElementById('pdAdminGalleryGrid').addEventListener('click', async (e) => {
+    const removeBtn = e.target.closest('.admin-gallery-remove');
+    if (!removeBtn) return;
+    const id = removeBtn.closest('.admin-gallery-thumb').dataset.id;
+    if (!confirm('Remove this image from the gallery?')) return;
+    const { error } = await sb.from('product_images').delete().eq('id', id);
+    if (error){ showAdminAlert('productsAlert', 'Could not remove image: ' + error.message); return; }
+    await renderProductGallery(viewingProductId);
   });
 
   document.getElementById('productForm').addEventListener('submit', async (e) => {

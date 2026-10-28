@@ -30,6 +30,13 @@ create table products (
   stock int not null default 100
 );
 
+create table product_images (
+  id uuid primary key default gen_random_uuid(),
+  product_id text not null references products(id) on delete cascade,
+  url text not null,
+  created_at timestamptz not null default now()
+);
+
 -- One row per auth.users row; created automatically by the trigger below.
 -- is_admin is never self-serve -- promote an account manually (see the
 -- "ADMIN ACCESS" note near the bottom) after it has signed up normally.
@@ -75,13 +82,14 @@ create table order_items (
   price_at_purchase numeric not null
 );
 
--- Postgres doesn't auto-index FK columns (only PKs); these two are read on
--- every RLS check for orders/order_items, so they need an explicit index.
--- (cart_items/wishlist_items don't need one here: their existing
--- `unique (user_id, product_id)` constraint already indexes user_id as its
--- leading column.)
+-- Postgres doesn't auto-index FK columns (only PKs); these three are read on
+-- every RLS check for orders/order_items/product_images, so they need an
+-- explicit index. (cart_items/wishlist_items don't need one here: their
+-- existing `unique (user_id, product_id)` constraint already indexes
+-- user_id as its leading column.)
 create index orders_user_id_idx on orders(user_id);
 create index order_items_order_id_idx on order_items(order_id);
+create index product_images_product_id_idx on product_images(product_id);
 
 -- ===================== AUTO-CREATE PROFILE ON SIGNUP =====================
 -- The frontend passes { data: { name } } to supabase.auth.signUp(); this
@@ -108,6 +116,7 @@ create trigger on_auth_user_created
 
 alter table categories enable row level security;
 alter table products enable row level security;
+alter table product_images enable row level security;
 alter table profiles enable row level security;
 alter table cart_items enable row level security;
 alter table wishlist_items enable row level security;
@@ -116,6 +125,7 @@ alter table order_items enable row level security;
 
 create policy "public read categories" on categories for select using (true);
 create policy "public read products" on products for select using (true);
+create policy "public read product gallery" on product_images for select using (true);
 
 create policy "read own profile" on profiles for select using (auth.uid() = id);
 
@@ -138,6 +148,10 @@ create policy "insert own order items" on order_items for insert
 -- below (SECURITY DEFINER, so it bypasses these entirely) -- these let an
 -- admin browse every order and update its status from the dashboard.
 create policy "admin manage products" on products for all
+  using (exists (select 1 from profiles where id = auth.uid() and is_admin))
+  with check (exists (select 1 from profiles where id = auth.uid() and is_admin));
+
+create policy "admin manage product gallery" on product_images for all
   using (exists (select 1 from profiles where id = auth.uid() and is_admin))
   with check (exists (select 1 from profiles where id = auth.uid() and is_admin));
 

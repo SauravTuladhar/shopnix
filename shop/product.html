@@ -12,7 +12,7 @@
 <meta property="og:description" content="View full product details, pricing, and reviews, and shop related picks on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/product.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-hKjDPFP1f9EtFfZK35gErTLSSGVn8W00v0K19Mya9+g='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-KuDuF3c2sj07ip0iTBgZP6F+Q2drw9V7Fg9WfLlP+5Q='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -106,6 +106,30 @@ function renderRelatedProducts(p){
   renderGrid(document.getElementById('relatedProductsGrid'), related);
 }
 
+function productDetailThumbHTML(url, idx, active){
+  return `<img src="${url}" alt="Photo ${idx + 1}" class="product-detail-thumb${active ? ' active' : ''}" data-src="${url}">`;
+}
+
+function loadProductGallery(p){
+  sb.from('product_images').select('url').eq('product_id', p.id).order('created_at')
+    .then(({ data, error }) => {
+      if (error || !data || data.length === 0) return;
+      const media = document.querySelector('.product-detail-media');
+      const mainImg = document.getElementById('productDetailMainImg');
+      if (!media || !mainImg) return;
+      const images = [p.img, ...data.map(r => r.url)];
+      const thumbsHTML = images.map((url, i) => productDetailThumbHTML(url, i, i === 0)).join('');
+      media.insertAdjacentHTML('beforeend', `<div class="product-detail-thumbs" id="productDetailThumbs">${thumbsHTML}</div>`);
+      document.getElementById('productDetailThumbs').addEventListener('click', (e) => {
+        const thumb = e.target.closest('.product-detail-thumb');
+        if (!thumb) return;
+        mainImg.src = thumb.dataset.src;
+        document.querySelectorAll('.product-detail-thumb').forEach(t => t.classList.toggle('active', t === thumb));
+      });
+    })
+    .catch(() => {});
+}
+
 function renderProductDetail(){
   const id = getRequestedProductId();
   const p = id ? getProductById(id) : null;
@@ -139,7 +163,7 @@ function renderProductDetail(){
       <div class="product-detail-media form-card" style="max-width:none;">
         ${discount ? `<div class="discount-tag">-${discount}%</div>` : ''}
         ${outOfStock ? `<div class="stock-tag">Out of stock</div>` : ''}
-        <img src="${p.img}" alt="${p.name}">
+        <img src="${p.img}" alt="${p.name}" id="productDetailMainImg">
       </div>
       <div class="product-detail-info form-card" style="max-width:none;">
         <h1>${p.name}</h1>
@@ -168,6 +192,7 @@ function renderProductDetail(){
 
   wireProductDetailActions(p, outOfStock);
   renderRelatedProducts(p);
+  loadProductGallery(p);
 }
 
 loadCatalog().then(renderProductDetail).catch(showCatalogError);
