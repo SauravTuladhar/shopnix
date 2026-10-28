@@ -43,74 +43,100 @@
     </header>
 
     <section id="productsPanel" class="admin-panel active">
-      <div class="form-card admin-form-card">
-        <h2 id="productFormTitle">Add Product</h2>
-        <form id="productForm" novalidate>
-          <div class="admin-form-grid">
-            <div class="field">
-              <label for="productIdInput">Product ID (auto from name)</label>
-              <input type="text" id="productIdInput" placeholder="generated-from-name" disabled>
-            </div>
-            <div class="field">
-              <label for="productNameInput">Name</label>
-              <input type="text" id="productNameInput" required>
-            </div>
-            <div class="field">
-              <label for="productCategoryInput">Category</label>
-              <select id="productCategoryInput" required></select>
-            </div>
-            <div class="field">
-              <label for="productPriceInput">Price (Rs.)</label>
-              <input type="number" id="productPriceInput" min="0" step="0.01" required>
-            </div>
-            <div class="field">
-              <label for="productOldPriceInput">Previous Price (optional)</label>
-              <input type="number" id="productOldPriceInput" min="0" step="0.01">
-              <div class="field-hint">Set this to track a price change — it shows as a struck-through "was" price with a discount/increase badge below, both here and on the storefront.</div>
-            </div>
-            <div class="field">
-              <label for="productStockInput">Stock Quantity</label>
-              <input type="number" id="productStockInput" min="0" step="1" required>
-            </div>
-            <div class="field">
-              <label for="productImgInput">Image URL</label>
-              <input type="text" id="productImgInput" required>
-              <div class="admin-img-preview-wrap">
-                <img id="productImgPreview" class="admin-img-preview" alt="Image preview">
+      <div id="productListView">
+        <div class="form-card admin-form-card">
+          <h2 id="productFormTitle">Add Product</h2>
+          <form id="productForm" novalidate>
+            <div class="admin-form-grid">
+              <div class="field">
+                <label for="productIdInput">Product ID (auto from name)</label>
+                <input type="text" id="productIdInput" placeholder="generated-from-name" disabled>
+              </div>
+              <div class="field">
+                <label for="productNameInput">Name</label>
+                <input type="text" id="productNameInput" required>
+              </div>
+              <div class="field">
+                <label for="productCategoryInput">Category</label>
+                <select id="productCategoryInput" required></select>
+              </div>
+              <div class="field">
+                <label for="productPriceInput">Price (Rs.)</label>
+                <input type="number" id="productPriceInput" min="0" step="0.01" required>
+              </div>
+              <div class="field">
+                <label for="productOldPriceInput">Previous Price (optional)</label>
+                <input type="number" id="productOldPriceInput" min="0" step="0.01">
+                <div class="field-hint">Set this to track a price change — it shows as a struck-through "was" price with a discount/increase badge below, both here and on the storefront.</div>
+              </div>
+              <div class="field">
+                <label for="productStockInput">Stock Quantity</label>
+                <input type="number" id="productStockInput" min="0" step="1" required>
+              </div>
+              <div class="field">
+                <label for="productImgInput">Image URL</label>
+                <input type="text" id="productImgInput" required>
+                <div class="admin-img-preview-wrap">
+                  <img id="productImgPreview" class="admin-img-preview" alt="Image preview">
+                </div>
+              </div>
+              <div class="field">
+                <label for="productRatingInput">Rating (0-5)</label>
+                <input type="number" id="productRatingInput" min="0" max="5" step="0.1" value="4" required>
+              </div>
+              <div class="field">
+                <label for="productReviewsInput">Reviews Count</label>
+                <input type="number" id="productReviewsInput" min="0" step="1" value="0" required>
               </div>
             </div>
             <div class="field">
-              <label for="productRatingInput">Rating (0-5)</label>
-              <input type="number" id="productRatingInput" min="0" max="5" step="0.1" value="4" required>
+              <label for="productDescriptionInput">Description (optional)</label>
+              <textarea id="productDescriptionInput" rows="4"></textarea>
             </div>
-            <div class="field">
-              <label for="productReviewsInput">Reviews Count</label>
-              <input type="number" id="productReviewsInput" min="0" step="1" value="0" required>
+            <div class="field-inline">
+              <input type="checkbox" id="productFlashInput">
+              <label for="productFlashInput">Flash sale item</label>
             </div>
-          </div>
-          <div class="field-inline">
-            <input type="checkbox" id="productFlashInput">
-            <label for="productFlashInput">Flash sale item</label>
-          </div>
-          <div class="admin-form-actions">
-            <button type="submit" class="btn btn-accent">Save Product</button>
-            <button type="button" class="btn btn-outline" id="productCancelEdit" style="display:none;">Cancel Edit</button>
-          </div>
-          <div class="form-alert" id="productsAlert"></div>
-        </form>
+            <div class="admin-form-actions">
+              <button type="submit" class="btn btn-accent">Save Product</button>
+              <button type="button" class="btn btn-outline" id="productCancelEdit" style="display:none;">Cancel Edit</button>
+            </div>
+            <div class="form-alert" id="productsAlert"></div>
+          </form>
+        </div>
+
+        <div class="admin-table-head">
+          <h3>All Products</h3>
+          <span class="admin-table-summary" id="productsSummary"></span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Flash</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="admin-table-head">
-        <h3>All Products</h3>
-        <span class="admin-table-summary" id="productsSummary"></span>
-      </div>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Flash</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="productsTableBody"></tbody>
-        </table>
+      <div id="productDetailView" class="admin-form-card" style="display:none;">
+        <button type="button" class="btn btn-outline" id="productDetailBack">&larr; Back to Products</button>
+        <div class="admin-product-detail">
+          <img id="pdAdminImg" class="admin-product-detail-img" alt="">
+          <div class="admin-product-detail-info">
+            <h2 id="pdAdminName"></h2>
+            <p><span class="text-light">Category:</span> <span id="pdAdminCategory"></span></p>
+            <p><span class="text-light">Price:</span> <span id="pdAdminPrice"></span></p>
+            <p><span class="text-light">Stock:</span> <span id="pdAdminStock"></span></p>
+            <p><span class="text-light">Rating:</span> <span id="pdAdminRating"></span></p>
+            <p id="pdAdminFlash" class="text-light"></p>
+            <p id="pdAdminDescription" class="admin-product-detail-description"></p>
+            <div class="admin-form-actions">
+              <button type="button" class="btn btn-outline" id="productDetailEdit">Edit</button>
+              <button type="button" class="btn btn-accent" id="productDetailDelete">Delete</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 

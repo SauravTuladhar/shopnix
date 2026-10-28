@@ -58,6 +58,8 @@ h1,h2,h3,h4{margin:0;}
 .btn-dark:hover{background:#111827;transform:translateY(-1px);box-shadow:var(--shadow);}
 .btn-outline{background:transparent;border:1.5px solid var(--primary);color:var(--primary);}
 .btn-outline:hover{background:var(--primary);color:#fff;}
+.btn-outline.active{border-color:var(--accent);color:var(--accent-dark);}
+.btn-outline.active:hover{background:var(--accent);color:#fff;}
 .btn-add{
   width:100%;
   background:var(--primary);
@@ -544,6 +546,39 @@ h1,h2,h3,h4{margin:0;}
 }
 .progress-bar div{height:100%;background:var(--accent);}
 .product-card small{font-size:11px;color:var(--text-light);}
+
+/* ===================== PRODUCT DETAIL PAGE (shop/product.html) ===================== */
+/* Image + info columns reuse .split-layout; each column reuses .form-card
+   (with max-width:none, same inline-style pattern as cart.html/checkout.html)
+   rather than inventing new container styles. */
+.product-detail-media{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.product-detail-media img{
+  width:100%;
+  max-width:420px;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:var(--radius);
+}
+.product-detail-info h1{font-size:22px;margin-bottom:10px;letter-spacing:-.2px;}
+.product-detail-info .rating{font-size:13px;margin-bottom:10px;}
+.product-detail-info .price-row{margin-bottom:10px;}
+.product-detail-info .price{font-size:24px;}
+.product-detail-info .old-price{font-size:14px;}
+.product-detail-stock{font-size:13.5px;color:var(--text-light);margin:0 0 18px;font-weight:600;}
+.product-detail-description{margin:0 0 20px;}
+.product-detail-description h2{font-size:16px;margin:0 0 8px;}
+.product-detail-description p{color:var(--text-light);line-height:1.7;margin:0;}
+.product-detail-qty{margin:0 0 20px;}
+.product-detail-qty button{width:30px;height:30px;font-size:15px;}
+.product-detail-qty span{min-width:22px;text-align:center;font-weight:700;}
+.product-detail-actions{display:flex;flex-wrap:wrap;gap:12px;}
+.product-detail-actions .btn{flex:1 1 180px;width:auto;margin-top:0;}
+.product-detail-section{margin-top:40px;}
 
 /* ===================== CATEGORY ICON GRID ===================== */
 .cat-grid{
@@ -1378,6 +1413,18 @@ h1,h2,h3,h4{margin:0;}
 .admin-actions .btn{padding:6px 12px;font-size:12.5px;}
 
 .admin-order-status{border:1px solid var(--border);border-radius:999px;padding:5px 14px;font-size:12.5px;font-weight:700;}
+
+.admin-product-detail{display:flex;gap:28px;margin-top:18px;flex-wrap:wrap;}
+.admin-product-detail-img{width:220px;height:220px;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+.admin-product-detail-info{flex:1;min-width:220px;}
+.admin-product-detail-info h2{margin:0 0 10px;font-size:19px;}
+.admin-product-detail-info p{margin:0 0 8px;font-size:13.5px;}
+.admin-product-detail-description{white-space:pre-wrap;color:var(--text);margin-top:12px;line-height:1.6;}
+
+@media (max-width:560px){
+  .admin-product-detail{flex-direction:column;}
+  .admin-product-detail-img{width:100%;height:200px;}
+}
 
 @media (max-width:900px){
   .admin-shell{flex-direction:column;}

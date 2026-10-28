@@ -22,6 +22,7 @@ create table products (
   old_price numeric,
   category_slug text not null references categories(slug),
   img text not null,
+  description text,
   rating numeric not null,
   reviews int not null,
   flash boolean not null default false,

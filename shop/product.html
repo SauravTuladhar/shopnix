@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitleTag">Product Details — Shopnix</title>
+<meta name="description" content="View full product details, pricing, and reviews, and shop related picks on Shopnix.">
+<link rel="canonical" href="https://sauravtuladhar.github.io/shopnix/shop/product.html">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Product Details — Shopnix">
+<meta property="og:description" content="View full product details, pricing, and reviews, and shop related picks on Shopnix.">
+<meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/product.html">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-hKjDPFP1f9EtFfZK35gErTLSSGVn8W00v0K19Mya9+g='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a> / <a href="category.html" id="breadcrumbCategory">Category</a> / <span id="breadcrumbProduct">Product</span>
+    </div>
+    <h1 id="pageTitle">Product Details</h1>
+    <p>Everything you need to know before you buy</p>
+  </div>
+</section>
+
+<main class="page-content">
+  <div class="container">
+    <div id="productDetailRoot"></div>
+    <section id="relatedProductsSection" class="product-detail-section" style="display:none;">
+      <h2>Related Products</h2>
+      <div class="product-grid" id="relatedProductsGrid"></div>
+    </section>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="../js/partials.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/catalog.js"></script>
+<script src="../js/common.js"></script>
+<script>
+let currentQty = 1;
+
+function getRequestedProductId(){
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+function renderNotFound(){
+  document.title = 'Product Not Found — Shopnix';
+  document.getElementById('pageTitle').textContent = 'Product Not Found';
+  document.getElementById('breadcrumbCategory').style.display = 'none';
+  document.getElementById('breadcrumbProduct').textContent = 'Not found';
+  document.getElementById('productDetailRoot').innerHTML =
+    '<p class="empty-state">Product not found. <a href="../index.html">Continue shopping &rsaquo;</a></p>';
+  document.getElementById('relatedProductsSection').style.display = 'none';
+}
+
+function wireProductDetailActions(p, outOfStock){
+  const qtyEl = document.getElementById('productDetailQty');
+  const decBtn = document.getElementById('productDetailQtyDec');
+  const incBtn = document.getElementById('productDetailQtyInc');
+  const addBtn = document.getElementById('productDetailAddBtn');
+  const wishBtn = document.getElementById('productDetailWishBtn');
+
+  decBtn.addEventListener('click', () => {
+    currentQty = Math.max(1, currentQty - 1);
+    qtyEl.textContent = currentQty;
+  });
+  incBtn.addEventListener('click', () => {
+    currentQty += 1;
+    qtyEl.textContent = currentQty;
+  });
+
+  addBtn.addEventListener('click', () => {
+    if (addBtn.disabled) return;
+    addToCart(p.id, currentQty);
+    showToast(`"${p.name}" added to cart`);
+    currentQty = 1;
+    qtyEl.textContent = currentQty;
+  });
+
+  wishBtn.addEventListener('click', () => {
+    const added = toggleWishlist(p.id);
+    wishBtn.classList.toggle('active', added);
+    wishBtn.innerHTML = added ? '&#9829; Remove from Wishlist' : '&#9825; Add to Wishlist';
+    showToast(added ? `Added "${p.name}" to wishlist` : `Removed "${p.name}" from wishlist`);
+  });
+}
+
+function renderRelatedProducts(p){
+  const related = PRODUCTS.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
+  const section = document.getElementById('relatedProductsSection');
+  if (related.length === 0){
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  renderGrid(document.getElementById('relatedProductsGrid'), related);
+}
+
+function renderProductDetail(){
+  const id = getRequestedProductId();
+  const p = id ? getProductById(id) : null;
+  if (!p){
+    renderNotFound();
+    return;
+  }
+
+  currentQty = 1;
+
+  const discount = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : null;
+  const outOfStock = p.stock !== undefined && p.stock !== null && p.stock <= 0;
+  const wished = isWished(p.id);
+  const description = (p.description && p.description.trim())
+    ? p.description
+    : 'No description available for this product yet.';
+  let stockText;
+  if (outOfStock) stockText = 'Out of stock';
+  else if (p.stock !== undefined && p.stock !== null) stockText = `In stock (${p.stock} available)`;
+  else stockText = 'In stock';
+
+  document.title = p.name + ' — Shopnix';
+  document.getElementById('pageTitle').textContent = p.name;
+  const catLink = document.getElementById('breadcrumbCategory');
+  catLink.textContent = categoryLabel(p.category);
+  catLink.href = 'category.html?cat=' + encodeURIComponent(p.category);
+  document.getElementById('breadcrumbProduct').textContent = p.name;
+
+  document.getElementById('productDetailRoot').innerHTML = `
+    <div class="product-detail split-layout">
+      <div class="product-detail-media form-card" style="max-width:none;">
+        ${discount ? `<div class="discount-tag">-${discount}%</div>` : ''}
+        ${outOfStock ? `<div class="stock-tag">Out of stock</div>` : ''}
+        <img src="${p.img}" alt="${p.name}">
+      </div>
+      <div class="product-detail-info form-card" style="max-width:none;">
+        <h1>${p.name}</h1>
+        <div class="rating">${renderStars(p.rating)} <span>(${p.reviews} reviews)</span></div>
+        <div class="price-row">
+          <span class="price">${money(p.price)}</span>
+          ${p.oldPrice ? `<span class="old-price">${money(p.oldPrice)}</span>` : ''}
+        </div>
+        <p class="product-detail-stock">${stockText}</p>
+        <div class="product-detail-description">
+          <h2>Description</h2>
+          <p>${description}</p>
+        </div>
+        <div class="cart-item-qty product-detail-qty">
+          <button class="qty-dec" id="productDetailQtyDec" type="button" aria-label="Decrease quantity">-</button>
+          <span id="productDetailQty">1</span>
+          <button class="qty-inc" id="productDetailQtyInc" type="button" aria-label="Increase quantity">+</button>
+        </div>
+        <div class="product-detail-actions">
+          <button class="btn btn-accent" id="productDetailAddBtn"${outOfStock ? ' disabled' : ''}>${outOfStock ? 'Out of Stock' : 'Add to Cart'}</button>
+          <button class="btn btn-outline${wished ? ' active' : ''}" id="productDetailWishBtn">${wished ? '&#9829; Remove from Wishlist' : '&#9825; Add to Wishlist'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  wireProductDetailActions(p, outOfStock);
+  renderRelatedProducts(p);
+}
+
+loadCatalog().then(renderProductDetail).catch(showCatalogError);
+</script>
+</body>
+</html>

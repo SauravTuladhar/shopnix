@@ -79,7 +79,7 @@ function stockClass(stock){
 function productRowHTML(p){
   return `
     <tr data-id="${p.id}">
-      <td>${p.name}</td>
+      <td><a href="#" class="admin-view-product">${p.name}</a></td>
       <td>${categoryLabelFor(p.category_slug)}</td>
       <td>${priceCellHTML(p)}</td>
       <td class="${stockClass(p.stock)}">${p.stock}</td>
@@ -143,6 +143,7 @@ function fillProductForm(p){
   document.getElementById('productRatingInput').value = p.rating;
   document.getElementById('productReviewsInput').value = p.reviews;
   document.getElementById('productFlashInput').checked = p.flash;
+  document.getElementById('productDescriptionInput').value = p.description || '';
   document.getElementById('productCancelEdit').style.display = 'inline-block';
   window.scrollTo({ top: document.getElementById('productForm').offsetTop - 80, behavior: 'smooth' });
 }
@@ -151,6 +152,40 @@ function showAdminAlert(id, msg, ok){
   const el = document.getElementById(id);
   el.textContent = msg;
   el.className = 'form-alert show ' + (ok ? 'success' : 'error');
+}
+
+let viewingProductId = null;
+
+function showProductDetail(p){
+  viewingProductId = p.id;
+  const img = document.getElementById('pdAdminImg');
+  img.src = p.img;
+  img.alt = p.name;
+  document.getElementById('pdAdminName').textContent = p.name;
+  document.getElementById('pdAdminCategory').textContent = categoryLabelFor(p.category_slug);
+  document.getElementById('pdAdminPrice').innerHTML = priceCellHTML(p);
+  document.getElementById('pdAdminStock').textContent = p.stock <= 0 ? 'Out of stock' : `${p.stock} in stock`;
+  document.getElementById('pdAdminRating').textContent = `${p.rating} ★ (${p.reviews} reviews)`;
+  document.getElementById('pdAdminFlash').textContent = p.flash ? 'Flash sale item' : 'Not a flash sale item';
+  document.getElementById('pdAdminDescription').textContent = p.description || 'No description set.';
+  document.getElementById('productListView').style.display = 'none';
+  document.getElementById('productDetailView').style.display = 'block';
+}
+
+function hideProductDetail(){
+  viewingProductId = null;
+  document.getElementById('productDetailView').style.display = 'none';
+  document.getElementById('productListView').style.display = 'block';
+}
+
+async function deleteProduct(p){
+  if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+  const { error } = await sb.from('products').delete().eq('id', p.id);
+  if (error){ showAdminAlert('productsAlert', 'Could not delete: ' + error.message); return; }
+  showAdminAlert('productsAlert', `Deleted "${p.name}".`, true);
+  if (editingProductId === p.id) resetProductForm();
+  if (viewingProductId === p.id) hideProductDetail();
+  await loadProducts();
 }
 
 function initProductsSection(){
@@ -175,6 +210,7 @@ function initProductsSection(){
       rating: Number(document.getElementById('productRatingInput').value),
       reviews: Number(document.getElementById('productReviewsInput').value),
       flash: document.getElementById('productFlashInput').checked,
+      description: document.getElementById('productDescriptionInput').value.trim() || null,
     };
 
     if (editingProductId){
@@ -206,16 +242,25 @@ function initProductsSection(){
     const p = PRODUCT_ROWS.find(p => p.id === id);
     if (!p) return;
 
-    if (e.target.closest('.admin-edit-product')){
+    if (e.target.closest('.admin-view-product')){
+      e.preventDefault();
+      showProductDetail(p);
+    } else if (e.target.closest('.admin-edit-product')){
       fillProductForm(p);
     } else if (e.target.closest('.admin-delete-product')){
-      if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
-      const { error } = await sb.from('products').delete().eq('id', id);
-      if (error){ showAdminAlert('productsAlert', 'Could not delete: ' + error.message); return; }
-      showAdminAlert('productsAlert', `Deleted "${p.name}".`, true);
-      if (editingProductId === id) resetProductForm();
-      await loadProducts();
+      await deleteProduct(p);
     }
+  });
+
+  document.getElementById('productDetailBack').addEventListener('click', hideProductDetail);
+  document.getElementById('productDetailEdit').addEventListener('click', () => {
+    const p = PRODUCT_ROWS.find(p => p.id === viewingProductId);
+    hideProductDetail();
+    if (p) fillProductForm(p);
+  });
+  document.getElementById('productDetailDelete').addEventListener('click', async () => {
+    const p = PRODUCT_ROWS.find(p => p.id === viewingProductId);
+    if (p) await deleteProduct(p);
   });
 }
 

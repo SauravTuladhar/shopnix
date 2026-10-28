@@ -143,10 +143,10 @@ function productCardHTML(p){
       ${discount ? `<div class="discount-tag">-${discount}%</div>` : ''}
       ${outOfStock ? `<div class="stock-tag">Out of stock</div>` : ''}
       <button class="wish-toggle${wished ? ' active' : ''}" aria-label="Toggle wishlist">${wished ? '&#9829;' : '&#9825;'}</button>
-      <a href="category.html?cat=${p.category}" class="product-img-link">
+      <a href="${ROOT_PATH}shop/product.html?id=${p.id}" class="product-img-link">
         <img src="${p.img}" alt="${p.name}">
       </a>
-      <h4>${p.name}</h4>
+      <h4><a href="${ROOT_PATH}shop/product.html?id=${p.id}" class="product-title-link">${p.name}</a></h4>
       <div class="rating">${renderStars(p.rating)} <span>(${p.reviews})</span></div>
       <div class="price-row">
         <span class="price">${money(p.price)}</span>
