@@ -6,7 +6,7 @@
 <title>Admin Dashboard — Shopnix</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body class="admin-body">
@@ -79,6 +79,9 @@
                 <div class="admin-img-preview-wrap">
                   <img id="productImgPreview" class="admin-img-preview" alt="Image preview">
                 </div>
+                <div class="field-hint">Paste a URL above, or choose a file below to upload it and fill this in automatically (JPEG/PNG/WebP/GIF, up to 5MB).</div>
+                <input type="file" id="productImgFileInput" accept="image/jpeg,image/png,image/webp,image/gif">
+                <div class="field-hint" id="productImgUploadStatus"></div>
               </div>
               <div class="field">
                 <label for="productRatingInput">Rating (0-5)</label>

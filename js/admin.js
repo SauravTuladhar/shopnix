@@ -99,6 +99,8 @@ function categoryLabelFor(slug){
 
 let PRODUCT_ROWS = [];
 let editingProductId = null;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 async function loadProducts(){
   const { data, error } = await sb.from('products').select('*').order('name');
@@ -125,7 +127,43 @@ function resetProductForm(){
   document.getElementById('productFormTitle').textContent = 'Add Product';
   document.getElementById('productIdInput').placeholder = 'generated-from-name';
   document.getElementById('productCancelEdit').style.display = 'none';
+  document.getElementById('productImgUploadStatus').textContent = '';
   updateImgPreview('');
+}
+
+async function uploadProductImage(file){
+  const statusEl = document.getElementById('productImgUploadStatus');
+  const fileInput = document.getElementById('productImgFileInput');
+
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)){
+    showAdminAlert('productsAlert', 'Please choose a JPEG, PNG, WebP, or GIF image.');
+    return;
+  }
+  if (file.size > MAX_IMAGE_BYTES){
+    showAdminAlert('productsAlert', 'Image must be 5MB or smaller.');
+    return;
+  }
+
+  const ext = (file.name.split('.').pop() || file.type.split('/').pop() || 'jpg').toLowerCase();
+  const idPart = editingProductId || slugify(document.getElementById('productNameInput').value.trim()) || 'product';
+  const path = `${idPart}-${Date.now()}.${ext}`;
+
+  statusEl.textContent = 'Uploading…';
+  fileInput.disabled = true;
+  const { error } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false });
+  fileInput.disabled = false;
+
+  if (error){
+    statusEl.textContent = '';
+    showAdminAlert('productsAlert', 'Could not upload image: ' + error.message);
+    return;
+  }
+
+  const { data } = sb.storage.from('product-images').getPublicUrl(path);
+  document.getElementById('productImgInput').value = data.publicUrl;
+  updateImgPreview(data.publicUrl);
+  statusEl.textContent = 'Uploaded.';
+  showAdminAlert('productsAlert', 'Image uploaded.', true);
 }
 
 function fillProductForm(p){
@@ -144,6 +182,8 @@ function fillProductForm(p){
   document.getElementById('productReviewsInput').value = p.reviews;
   document.getElementById('productFlashInput').checked = p.flash;
   document.getElementById('productDescriptionInput').value = p.description || '';
+  document.getElementById('productImgFileInput').value = '';
+  document.getElementById('productImgUploadStatus').textContent = '';
   document.getElementById('productCancelEdit').style.display = 'inline-block';
   window.scrollTo({ top: document.getElementById('productForm').offsetTop - 80, behavior: 'smooth' });
 }
@@ -196,6 +236,13 @@ function initProductsSection(){
   imgInput.addEventListener('input', () => updateImgPreview(imgInput.value.trim()));
   imgPreview.addEventListener('load', () => { imgPreview.style.display = 'block'; });
   imgPreview.addEventListener('error', () => { imgPreview.style.display = 'none'; });
+
+  document.getElementById('productImgFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    await uploadProductImage(file);
+    e.target.value = '';
+  });
 
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();

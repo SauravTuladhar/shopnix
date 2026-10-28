@@ -149,6 +149,24 @@ create policy "admin update orders" on orders for update
 create policy "admin read all order items" on order_items for select
   using (exists (select 1 from profiles where id = auth.uid() and is_admin));
 
+-- Storage bucket for admin-uploaded product images (alongside the existing
+-- paste-a-URL field). Public bucket since product photos are public-facing;
+-- writes are gated to admins via the same profiles.is_admin pattern.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('product-images', 'product-images', true, 5242880,
+        array['image/jpeg','image/png','image/webp','image/gif'])
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+create policy "admin manage product images" on storage.objects for all
+  using (bucket_id = 'product-images' and exists (select 1 from profiles where id = auth.uid() and is_admin))
+  with check (bucket_id = 'product-images' and exists (select 1 from profiles where id = auth.uid() and is_admin));
+
+create policy "public read product images" on storage.objects for select
+  using (bucket_id = 'product-images');
+
 -- ===================== CHECKOUT: place_order() =====================
 -- Turns a cart into a real order: validates stock, inserts the order + its
 -- items at current price, decrements stock, and returns the new order_code.
