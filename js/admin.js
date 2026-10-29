@@ -128,6 +128,8 @@ function resetProductForm(){
   document.getElementById('productIdInput').placeholder = 'generated-from-name';
   document.getElementById('productCancelEdit').style.display = 'none';
   document.getElementById('productImgUploadStatus').textContent = '';
+  document.getElementById('productRatingDisplay').textContent = '—';
+  document.getElementById('productReviewsDisplay').textContent = '—';
   updateImgPreview('');
 }
 
@@ -178,8 +180,8 @@ function fillProductForm(p){
   document.getElementById('productImgInput').value = p.img;
   updateImgPreview(p.img);
   document.getElementById('productStockInput').value = p.stock;
-  document.getElementById('productRatingInput').value = p.rating;
-  document.getElementById('productReviewsInput').value = p.reviews;
+  document.getElementById('productRatingDisplay').textContent = p.rating;
+  document.getElementById('productReviewsDisplay').textContent = `${p.reviews} review${p.reviews === 1 ? '' : 's'}`;
   document.getElementById('productFlashInput').checked = p.flash;
   document.getElementById('productDescriptionInput').value = p.description || '';
   document.getElementById('productImgFileInput').value = '';
@@ -269,50 +271,53 @@ function initProductsSection(){
   });
 
   document.getElementById('pdAdminGalleryFileInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
     const statusEl = document.getElementById('pdAdminGalleryStatus');
     const fileInput = e.target;
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)){
-      showAdminAlert('productsAlert', 'Please choose a JPEG, PNG, WebP, or GIF image.');
-      fileInput.value = '';
-      return;
-    }
-    if (file.size > MAX_IMAGE_BYTES){
-      showAdminAlert('productsAlert', 'Image must be 5MB or smaller.');
+    const valid = files.filter(f => ALLOWED_IMAGE_TYPES.includes(f.type) && f.size <= MAX_IMAGE_BYTES);
+    const skipped = files.filter(f => !valid.includes(f));
+    const skippedNote = skipped.length > 0
+      ? `Skipped ${skipped.length} file${skipped.length === 1 ? '' : 's'} (must be JPEG/PNG/WebP/GIF, up to 5MB): ${skipped.map(f => f.name).join(', ')}. `
+      : '';
+    if (valid.length === 0){
+      showAdminAlert('productsAlert', skippedNote.trim());
       fileInput.value = '';
       return;
     }
 
-    const ext = (file.name.split('.').pop() || file.type.split('/').pop() || 'jpg').toLowerCase();
-    const path = `${viewingProductId}-gallery-${Date.now()}.${ext}`;
-
-    statusEl.textContent = 'Uploading…';
     fileInput.disabled = true;
-    const { error: uploadError } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false });
+    let uploaded = 0;
+    const failed = [];
+
+    for (let i = 0; i < valid.length; i++){
+      const file = valid[i];
+      statusEl.textContent = `Uploading ${i + 1} of ${valid.length}…`;
+      const ext = (file.name.split('.').pop() || file.type.split('/').pop() || 'jpg').toLowerCase();
+      const path = `${viewingProductId}-gallery-${Date.now()}-${i}.${ext}`;
+
+      const { error: uploadError } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (uploadError){ failed.push(`${file.name} (upload failed: ${uploadError.message})`); continue; }
+
+      const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+      const { error: insertError } = await sb.from('product_images').insert({ product_id: viewingProductId, url: urlData.publicUrl });
+      if (insertError){ failed.push(`${file.name} (uploaded but not saved: ${insertError.message})`); continue; }
+
+      uploaded++;
+    }
+
     fileInput.disabled = false;
-
-    if (uploadError){
-      statusEl.textContent = '';
-      showAdminAlert('productsAlert', 'Could not upload image: ' + uploadError.message);
-      fileInput.value = '';
-      return;
-    }
-
-    const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
-    const { error: insertError } = await sb.from('product_images').insert({ product_id: viewingProductId, url: urlData.publicUrl });
     fileInput.value = '';
+    statusEl.textContent = uploaded > 0 ? `Uploaded ${uploaded} image${uploaded === 1 ? '' : 's'}.` : '';
 
-    if (insertError){
-      statusEl.textContent = '';
-      showAdminAlert('productsAlert', 'Image uploaded but could not be saved: ' + insertError.message);
-      return;
+    if (failed.length > 0){
+      showAdminAlert('productsAlert', `${skippedNote}${uploaded} uploaded, ${failed.length} failed: ${failed.join('; ')}`);
+    } else {
+      showAdminAlert('productsAlert', `${skippedNote}${uploaded} image${uploaded === 1 ? '' : 's'} added to gallery.`, skippedNote === '');
     }
 
-    statusEl.textContent = 'Uploaded.';
-    showAdminAlert('productsAlert', 'Image added to gallery.', true);
-    await renderProductGallery(viewingProductId);
+    if (uploaded > 0) await renderProductGallery(viewingProductId);
   });
 
   document.getElementById('pdAdminGalleryGrid').addEventListener('click', async (e) => {
@@ -335,8 +340,6 @@ function initProductsSection(){
       old_price: document.getElementById('productOldPriceInput').value ? Number(document.getElementById('productOldPriceInput').value) : null,
       img: document.getElementById('productImgInput').value.trim(),
       stock: Number(document.getElementById('productStockInput').value),
-      rating: Number(document.getElementById('productRatingInput').value),
-      reviews: Number(document.getElementById('productReviewsInput').value),
       flash: document.getElementById('productFlashInput').checked,
       description: document.getElementById('productDescriptionInput').value.trim() || null,
     };
@@ -348,7 +351,7 @@ function initProductsSection(){
     } else {
       const id = slugify(name);
       if (!id){ showAdminAlert('productsAlert', 'Please enter a product name.'); return; }
-      const { error } = await sb.from('products').insert({ id, ...row, sold: null });
+      const { error } = await sb.from('products').insert({ id, ...row, rating: 0, reviews: 0, sold: null });
       if (error){
         showAdminAlert('productsAlert', error.code === '23505'
           ? 'A product with a very similar name already exists. Try a more specific name.'
@@ -389,6 +392,124 @@ function initProductsSection(){
   document.getElementById('productDetailDelete').addEventListener('click', async () => {
     const p = PRODUCT_ROWS.find(p => p.id === viewingProductId);
     if (p) await deleteProduct(p);
+  });
+}
+
+/* ===================== CATEGORIES ===================== */
+let editingCategorySlug = null;
+
+function categoryRowHTML(c){
+  const productCount = PRODUCT_ROWS.filter(p => p.category_slug === c.slug).length;
+  return `
+    <tr data-slug="${c.slug}">
+      <td>${c.icon}</td>
+      <td>${c.label}</td>
+      <td>${c.slug}</td>
+      <td>${c.sort_order}</td>
+      <td>${productCount}</td>
+      <td class="admin-actions">
+        <button type="button" class="btn btn-outline admin-edit-category">Edit</button>
+        <button type="button" class="btn btn-accent admin-delete-category">Delete</button>
+      </td>
+    </tr>
+  `;
+}
+
+async function loadCategories(){
+  try {
+    await loadCategoryRows();
+  } catch (err) {
+    showAdminAlert('categoriesAlert', 'Could not load categories: ' + err.message);
+    return;
+  }
+  document.getElementById('categoriesTableBody').innerHTML = CATEGORY_ROWS.map(categoryRowHTML).join('')
+    || '<tr><td colspan="6" class="empty-state">No categories yet.</td></tr>';
+  const summary = document.getElementById('categoriesSummary');
+  if (summary) summary.textContent = `${CATEGORY_ROWS.length} categor${CATEGORY_ROWS.length === 1 ? 'y' : 'ies'}`;
+  document.getElementById('productCategoryInput').innerHTML = categoryOptionsHTML();
+}
+
+function resetCategoryForm(){
+  editingCategorySlug = null;
+  const form = document.getElementById('categoryForm');
+  form.reset();
+  document.getElementById('categoryFormTitle').textContent = 'Add Category';
+  document.getElementById('categorySlugInput').value = '';
+  document.getElementById('categoryCancelEdit').style.display = 'none';
+}
+
+function fillCategoryForm(c){
+  editingCategorySlug = c.slug;
+  document.getElementById('categoryFormTitle').textContent = `Edit "${c.label}"`;
+  document.getElementById('categorySlugInput').value = c.slug;
+  document.getElementById('categoryLabelInput').value = c.label;
+  document.getElementById('categoryIconInput').value = c.icon;
+  document.getElementById('categorySortInput').value = c.sort_order;
+  document.getElementById('categoryCancelEdit').style.display = 'inline-block';
+  window.scrollTo({ top: document.getElementById('categoryForm').offsetTop - 80, behavior: 'smooth' });
+}
+
+async function deleteCategory(c){
+  const productCount = PRODUCT_ROWS.filter(p => p.category_slug === c.slug).length;
+  if (productCount > 0){
+    showAdminAlert('categoriesAlert', `Can't delete "${c.label}" — ${productCount} product${productCount === 1 ? '' : 's'} still use this category. Reassign or delete them first.`);
+    return;
+  }
+  if (!confirm(`Delete "${c.label}"? This cannot be undone.`)) return;
+  const { error } = await sb.from('categories').delete().eq('slug', c.slug);
+  if (error){
+    showAdminAlert('categoriesAlert', error.code === '23503'
+      ? `Can't delete "${c.label}" — it's still referenced by existing products.`
+      : 'Could not delete: ' + error.message);
+    return;
+  }
+  showAdminAlert('categoriesAlert', `Deleted "${c.label}".`, true);
+  if (editingCategorySlug === c.slug) resetCategoryForm();
+  await loadCategories();
+}
+
+function initCategoriesSection(){
+  document.getElementById('categoryLabelInput').addEventListener('input', (e) => {
+    if (!editingCategorySlug){
+      document.getElementById('categorySlugInput').value = slugify(e.target.value.trim());
+    }
+  });
+
+  document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const label = document.getElementById('categoryLabelInput').value.trim();
+    const icon = document.getElementById('categoryIconInput').value.trim();
+    const sort_order = Number(document.getElementById('categorySortInput').value);
+
+    if (editingCategorySlug){
+      const { error } = await sb.from('categories').update({ label, icon, sort_order }).eq('slug', editingCategorySlug);
+      if (error){ showAdminAlert('categoriesAlert', 'Could not save category: ' + error.message); return; }
+      showAdminAlert('categoriesAlert', `Updated "${label}".`, true);
+    } else {
+      const slug = slugify(label);
+      if (!slug){ showAdminAlert('categoriesAlert', 'Please enter a category label.'); return; }
+      const { error } = await sb.from('categories').insert({ slug, label, icon, sort_order });
+      if (error){
+        showAdminAlert('categoriesAlert', error.code === '23505'
+          ? 'A category with a very similar name already exists. Try a more specific name.'
+          : 'Could not create category: ' + error.message);
+        return;
+      }
+      showAdminAlert('categoriesAlert', `Added "${label}".`, true);
+    }
+    resetCategoryForm();
+    await loadCategories();
+  });
+
+  document.getElementById('categoryCancelEdit').addEventListener('click', resetCategoryForm);
+
+  document.getElementById('categoriesTableBody').addEventListener('click', async (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+    const c = CATEGORY_ROWS.find(c => c.slug === row.dataset.slug);
+    if (!c) return;
+    if (e.target.closest('.admin-edit-category')) fillCategoryForm(c);
+    else if (e.target.closest('.admin-delete-category')) await deleteCategory(c);
   });
 }
 
@@ -472,6 +593,7 @@ async function initAdminDashboard(){
 
   initTabs();
   initProductsSection();
+  initCategoriesSection();
   initOrdersSection();
 
   try {
@@ -481,5 +603,6 @@ async function initAdminDashboard(){
     showAdminAlert('productsAlert', 'Could not load categories: ' + err.message);
   }
   await loadProducts();
+  await loadCategories();
   await loadOrders();
 }

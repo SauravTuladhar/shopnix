@@ -12,7 +12,7 @@
 <meta property="og:description" content="Enter your delivery details and complete your order on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/checkout.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-5U/YEbHxuJ5EaxrtqbqvFrBB/hyZ/rYSu5GR/eYORkg='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-R0jY1mmlu24yJnLvOgl67loGIctWHY0Pa2Ei/rxVOao='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -64,11 +64,20 @@
           </div>
           <div class="field">
             <label>Payment Method</label>
-            <select id="ckPayment">
-              <option value="cod">Cash on Delivery</option>
-              <option value="esewa">eSewa</option>
-              <option value="khalti">Khalti</option>
-            </select>
+            <div class="payment-options" role="radiogroup" aria-label="Payment method">
+              <label class="payment-option">
+                <input type="radio" name="ckPayment" value="cod" checked>
+                <span>Cash on Delivery</span>
+              </label>
+              <label class="payment-option disabled">
+                <input type="radio" name="ckPayment" value="esewa" disabled>
+                <span>eSewa <span class="badge-soon">Coming soon</span></span>
+              </label>
+              <label class="payment-option disabled">
+                <input type="radio" name="ckPayment" value="khalti" disabled>
+                <span>Khalti <span class="badge-soon">Coming soon</span></span>
+              </label>
+            </div>
           </div>
           <button type="submit" class="btn btn-accent">Place Order</button>
           <div class="form-alert" id="checkoutAlert"></div>
@@ -135,7 +144,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   const name = document.getElementById('ckNameInput').value.trim();
   const phone = document.getElementById('ckPhoneInput').value.trim();
   const address = document.getElementById('ckAddressInput').value.trim();
-  const paymentMethod = document.getElementById('ckPayment').value;
+  const paymentMethod = document.querySelector('input[name="ckPayment"]:checked').value;
 
   let valid = true;
   nameField.classList.toggle('invalid', !name); if (!name) valid = false;

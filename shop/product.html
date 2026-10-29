@@ -12,7 +12,7 @@
 <meta property="og:description" content="View full product details, pricing, and reviews, and shop related picks on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/product.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-KuDuF3c2sj07ip0iTBgZP6F+Q2drw9V7Fg9WfLlP+5Q='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-M3pqs4Uly7RibPtBBn233SbO3BwQl7CMYn+WvUHj7hQ='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -32,6 +32,12 @@
 <main class="page-content">
   <div class="container">
     <div id="productDetailRoot"></div>
+    <section id="productDetailReviewsSection" class="product-detail-section" style="display:none;">
+      <h2>Customer Reviews</h2>
+      <div id="productReviewsSummary"></div>
+      <div id="productReviewsList"></div>
+      <div id="productReviewFormWrap"></div>
+    </section>
     <section id="relatedProductsSection" class="product-detail-section" style="display:none;">
       <h2>Related Products</h2>
       <div class="product-grid" id="relatedProductsGrid"></div>
@@ -61,6 +67,7 @@ function renderNotFound(){
   document.getElementById('productDetailRoot').innerHTML =
     '<p class="empty-state">Product not found. <a href="../index.html">Continue shopping &rsaquo;</a></p>';
   document.getElementById('relatedProductsSection').style.display = 'none';
+  document.getElementById('productDetailReviewsSection').style.display = 'none';
 }
 
 function wireProductDetailActions(p, outOfStock){
@@ -130,6 +137,133 @@ function loadProductGallery(p){
     .catch(() => {});
 }
 
+function initLightbox(){
+  const media = document.querySelector('.product-detail-media');
+  if (!media) return;
+  let overlay = document.getElementById('lightboxOverlay');
+  if (!overlay){
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="lightbox-overlay" id="lightboxOverlay">
+        <div class="lightbox-panel">
+          <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+          <img id="lightboxImg" alt="">
+        </div>
+      </div>
+    `);
+    overlay = document.getElementById('lightboxOverlay');
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLightbox(); });
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+  }
+  media.addEventListener('click', (e) => {
+    if (e.target.closest('.product-detail-thumb')) return;
+    const mainImg = document.getElementById('productDetailMainImg');
+    document.getElementById('lightboxImg').src = mainImg.src;
+    overlay.classList.add('open');
+  });
+}
+function closeLightbox(){ document.getElementById('lightboxOverlay').classList.remove('open'); }
+
+function reviewRowHTML(r){
+  const date = new Date(r.created_at).toLocaleDateString();
+  return `
+    <div class="review-row">
+      <div class="review-row-head">
+        <span class="review-stars">${renderStars(r.rating)}</span>
+        <span class="review-author">${r.reviewer_name}</span>
+        <span class="review-date text-light">${date}</span>
+      </div>
+      ${r.body ? `<p class="review-body">${r.body}</p>` : ''}
+    </div>
+  `;
+}
+
+async function loadProductReviews(p){
+  const listEl = document.getElementById('productReviewsList');
+  listEl.innerHTML = '<p class="empty-state">Loading reviews…</p>';
+  const { data, error } = await sb.from('product_reviews').select('*').eq('product_id', p.id).order('created_at', { ascending: false });
+  if (error){ listEl.innerHTML = ''; document.getElementById('productDetailReviewsSection').style.display = 'none'; return; }
+  document.getElementById('productDetailReviewsSection').style.display = '';
+  document.getElementById('productReviewsSummary').innerHTML =
+    `<div class="rating">${renderStars(p.rating)} <span>${p.rating} out of 5 · ${p.reviews} review${p.reviews === 1 ? '' : 's'}</span></div>`;
+  listEl.innerHTML = data.length
+    ? data.map(reviewRowHTML).join('')
+    : '<p class="empty-state">No reviews yet. Be the first to review this product!</p>';
+}
+
+async function hasQualifyingPurchase(productId, userId){
+  const { data, error } = await sb
+    .from('order_items')
+    .select('id, orders!inner(status, user_id)')
+    .eq('product_id', productId)
+    .eq('orders.user_id', userId)
+    .neq('orders.status', 'Cancelled')
+    .limit(1);
+  return !error && data && data.length > 0;
+}
+
+async function renderProductReviewForm(p){
+  const wrap = document.getElementById('productReviewFormWrap');
+  const user = getUser();
+  if (!user){
+    wrap.innerHTML = '<p class="form-sub">Please <a href="../account/login.html">log in</a> to leave a review.</p>';
+    return;
+  }
+  const { data: existing } = await sb.from('product_reviews').select('id').eq('product_id', p.id).eq('user_id', user.id).maybeSingle();
+  if (existing){
+    wrap.innerHTML = "<p class=\"form-sub\">You've already reviewed this product. Thanks!</p>";
+    return;
+  }
+  const qualifies = await hasQualifyingPurchase(p.id, user.id);
+  if (!qualifies){
+    wrap.innerHTML = '<p class="form-sub">Only customers who have purchased this product can leave a review.</p>';
+    return;
+  }
+  wrap.innerHTML = `
+    <form id="reviewForm" class="form-card" style="max-width:none;" novalidate>
+      <h3>Write a Review</h3>
+      <div class="field">
+        <label for="reviewRatingInput">Rating</label>
+        <select id="reviewRatingInput" required>
+          <option value="5">5 — Excellent</option>
+          <option value="4">4 — Good</option>
+          <option value="3">3 — Average</option>
+          <option value="2">2 — Poor</option>
+          <option value="1">1 — Terrible</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="reviewBodyInput">Your Review (optional)</label>
+        <textarea id="reviewBodyInput" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-accent">Submit Review</button>
+      <div class="form-alert" id="reviewAlert"></div>
+    </form>
+  `;
+  document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertEl = document.getElementById('reviewAlert');
+    const { error } = await sb.from('product_reviews').insert({
+      product_id: p.id,
+      user_id: user.id,
+      reviewer_name: user.name,
+      rating: Number(document.getElementById('reviewRatingInput').value),
+      body: document.getElementById('reviewBodyInput').value.trim() || null,
+    });
+    if (error){
+      alertEl.textContent = error.message || 'Could not submit review.';
+      alertEl.className = 'form-alert show error';
+      return;
+    }
+    alertEl.textContent = 'Thanks for your review!';
+    alertEl.className = 'form-alert show success';
+    wrap.innerHTML = "<p class=\"form-sub\">You've already reviewed this product. Thanks!</p>";
+    const { data: fresh } = await sb.from('products').select('rating,reviews').eq('id', p.id).single();
+    if (fresh){ p.rating = fresh.rating; p.reviews = fresh.reviews; }
+    await loadProductReviews(p);
+  });
+}
+
 function renderProductDetail(){
   const id = getRequestedProductId();
   const p = id ? getProductById(id) : null;
@@ -188,13 +322,23 @@ function renderProductDetail(){
         </div>
       </div>
     </div>
+    <div class="mobile-sticky-cta">
+      <button class="btn btn-accent" id="productDetailAddBtnMobile"${outOfStock ? ' disabled' : ''}>${outOfStock ? 'Out of Stock' : 'Add to Cart'}</button>
+    </div>
   `;
 
   wireProductDetailActions(p, outOfStock);
+  document.getElementById('productDetailAddBtnMobile').addEventListener('click', () => {
+    document.getElementById('productDetailAddBtn').click();
+  });
+  initLightbox();
   renderRelatedProducts(p);
   loadProductGallery(p);
+  loadProductReviews(p);
+  onAuthChange(() => renderProductReviewForm(p));
 }
 
+renderSkeletonGrid(document.getElementById('productDetailRoot'), 1);
 loadCatalog().then(renderProductDetail).catch(showCatalogError);
 </script>
 </body>

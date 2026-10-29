@@ -37,6 +37,21 @@ create table product_images (
   created_at timestamptz not null default now()
 );
 
+-- Customer ratings + written reviews, gated to verified purchasers (see the
+-- "verified purchaser insert review" policy below). products.rating/reviews
+-- are auto-recomputed from these via the recompute_product_rating() trigger
+-- near the end of this file.
+create table product_reviews (
+  id uuid primary key default gen_random_uuid(),
+  product_id text not null references products(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  reviewer_name text not null,
+  rating int not null check (rating between 1 and 5),
+  body text,
+  created_at timestamptz not null default now(),
+  unique (product_id, user_id)
+);
+
 -- One row per auth.users row; created automatically by the trigger below.
 -- is_admin is never self-serve -- promote an account manually (see the
 -- "ADMIN ACCESS" note near the bottom) after it has signed up normally.
@@ -82,14 +97,15 @@ create table order_items (
   price_at_purchase numeric not null
 );
 
--- Postgres doesn't auto-index FK columns (only PKs); these three are read on
--- every RLS check for orders/order_items/product_images, so they need an
--- explicit index. (cart_items/wishlist_items don't need one here: their
--- existing `unique (user_id, product_id)` constraint already indexes
+-- Postgres doesn't auto-index FK columns (only PKs); these are read on every
+-- RLS check for orders/order_items/product_images/product_reviews, so they
+-- need an explicit index. (cart_items/wishlist_items don't need one here:
+-- their existing `unique (user_id, product_id)` constraint already indexes
 -- user_id as its leading column.)
 create index orders_user_id_idx on orders(user_id);
 create index order_items_order_id_idx on order_items(order_id);
 create index product_images_product_id_idx on product_images(product_id);
+create index product_reviews_product_id_idx on product_reviews(product_id);
 
 -- ===================== AUTO-CREATE PROFILE ON SIGNUP =====================
 -- The frontend passes { data: { name } } to supabase.auth.signUp(); this
@@ -117,6 +133,7 @@ create trigger on_auth_user_created
 alter table categories enable row level security;
 alter table products enable row level security;
 alter table product_images enable row level security;
+alter table product_reviews enable row level security;
 alter table profiles enable row level security;
 alter table cart_items enable row level security;
 alter table wishlist_items enable row level security;
@@ -126,6 +143,7 @@ alter table order_items enable row level security;
 create policy "public read categories" on categories for select using (true);
 create policy "public read products" on products for select using (true);
 create policy "public read product gallery" on product_images for select using (true);
+create policy "public read reviews" on product_reviews for select using (true);
 
 create policy "read own profile" on profiles for select using (auth.uid() = id);
 
@@ -134,6 +152,26 @@ create policy "manage own cart" on cart_items for all
 
 create policy "manage own wishlist" on wishlist_items for all
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Review INSERT is gated to users who've actually bought this product on an
+-- order that isn't Cancelled (see 0007_product_reviews.sql's header comment
+-- for why Cancelled-only, not Delivered-only). UPDATE/DELETE are simple
+-- owner checks -- a reviewer can edit or remove their own review any time.
+create policy "verified purchaser insert review" on product_reviews for insert
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from order_items oi
+      join orders o on o.id = oi.order_id
+      where oi.product_id = product_reviews.product_id
+        and o.user_id = auth.uid()
+        and o.status <> 'Cancelled'
+    )
+  );
+create policy "manage own review" on product_reviews for update
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "delete own review" on product_reviews for delete
+  using (auth.uid() = user_id);
 
 create policy "read own orders" on orders for select using (auth.uid() = user_id);
 create policy "insert own orders" on orders for insert with check (auth.uid() = user_id);
@@ -148,6 +186,10 @@ create policy "insert own order items" on order_items for insert
 -- below (SECURITY DEFINER, so it bypasses these entirely) -- these let an
 -- admin browse every order and update its status from the dashboard.
 create policy "admin manage products" on products for all
+  using (exists (select 1 from profiles where id = auth.uid() and is_admin))
+  with check (exists (select 1 from profiles where id = auth.uid() and is_admin));
+
+create policy "admin manage categories" on categories for all
   using (exists (select 1 from profiles where id = auth.uid() and is_admin))
   with check (exists (select 1 from profiles where id = auth.uid() and is_admin));
 
@@ -246,6 +288,27 @@ end;
 $$;
 
 grant execute on function place_order(jsonb, text, text, text, text) to authenticated;
+
+-- ===================== REVIEWS: recompute_product_rating() =====================
+-- Keeps products.rating/products.reviews in sync with real product_reviews
+-- rows. Only fires on actual product_reviews mutations -- a product with no
+-- reviews yet keeps its existing seeded rating/reviews values untouched.
+create or replace function recompute_product_rating()
+returns trigger as $$
+declare
+  v_product_id text := coalesce(new.product_id, old.product_id);
+begin
+  update products set
+    rating = coalesce((select round(avg(rating)::numeric, 1) from product_reviews where product_id = v_product_id), rating),
+    reviews = (select count(*) from product_reviews where product_id = v_product_id)
+  where id = v_product_id;
+  return null;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+create trigger on_product_review_change
+  after insert or update or delete on product_reviews
+  for each row execute function recompute_product_rating();
 
 -- ===================== ADMIN ACCESS =====================
 -- There's no self-serve admin signup. Sign up a normal account through the

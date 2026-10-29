@@ -12,7 +12,7 @@
 <meta property="og:description" content="Browse Shopnix products by category and find exactly what you're looking for.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/category.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ct9PtCCrcgSrv11edKxI8bvkcOQd4CHARFV1CvY9Os4='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-MNkURePQiWtbavsrTp9yWcM9i5g3mRW6SCw7jSDKpMU='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -93,6 +93,7 @@ function initCategoryPage(){
   });
 }
 
+renderSkeletonGrid(document.getElementById('catProductGrid'), 12);
 loadCatalog().then(initCategoryPage).catch(showCatalogError);
 </script>
 </body>

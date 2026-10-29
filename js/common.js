@@ -167,6 +167,18 @@ function renderGrid(container, products){
   container.innerHTML = products.map(productCardHTML).join('');
 }
 
+function skeletonCardHTML(){
+  return `<div class="skeleton-card">
+    <div class="skeleton skeleton-img"></div>
+    <div class="skeleton skeleton-line"></div>
+    <div class="skeleton skeleton-line short"></div>
+  </div>`;
+}
+function renderSkeletonGrid(container, count){
+  if (!container) return;
+  container.innerHTML = Array.from({ length: count }, skeletonCardHTML).join('');
+}
+
 // Event delegation: works for any grid injected now or later.
 document.addEventListener('click', (e) => {
   const wishBtn = e.target.closest('.wish-toggle');

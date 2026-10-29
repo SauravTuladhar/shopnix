@@ -141,7 +141,7 @@ const FOOTER_HTML = `
   </div>
 </div>
 <div class="footer-bottom">
-  <p>&copy; 2026 Shopnix. All rights reserved. (Educational demo project.)</p>
+  <p>&copy; 2026 Shopnix. All rights reserved.</p>
 </div>
 `;
 

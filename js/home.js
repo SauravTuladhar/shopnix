@@ -160,6 +160,7 @@ function handleHomeDeepLink(){
   }
 }
 
+renderSkeletonGrid(document.getElementById('productGrid'), PAGE_SIZE);
 loadCatalog().then(() => {
   renderSidebarCats();
   renderCatGrid();
