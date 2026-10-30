@@ -12,7 +12,7 @@
 <meta property="og:description" content="View full product details, pricing, and reviews, and shop related picks on Shopnix.">
 <meta property="og:url" content="https://sauravtuladhar.github.io/shopnix/shop/product.html">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-M3pqs4Uly7RibPtBBn233SbO3BwQl7CMYn+WvUHj7hQ='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://placehold.co https://rymkwiaaeopzerviomnu.supabase.co data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Tr9iY/0IQtBGdUWBT+wLuaaoZYabMIXfjHETU7H1QBw='; connect-src 'self' https://rymkwiaaeopzerviomnu.supabase.co; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
@@ -335,6 +335,7 @@ function renderProductDetail(){
   renderRelatedProducts(p);
   loadProductGallery(p);
   loadProductReviews(p);
+  renderProductReviewForm(p);
   onAuthChange(() => renderProductReviewForm(p));
 }
 
